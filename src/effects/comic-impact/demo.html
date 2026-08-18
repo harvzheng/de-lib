@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comic Impact — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Comic Impact</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>SVG + CSS &middot; annotation</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Annotation</p>
+        <h1>
+          Put the hit in
+          <span class="comic-impact-demo-hero-word" data-comic-impact="hero">the headline</span>
+        </h1>
+        <p>
+          The word stays real text. A seeded SVG burst, split-colour shadow and radiating speed
+          lines land behind it for one pop-shake-hold-exit beat.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <h2>Fire the beat</h2>
+        <p class="demo-note">
+          Tune the burst, then use <em>Replay</em>. Geometry changes stay deterministic at the same
+          seed.
+        </p>
+        <div class="demo-panel comic-impact-demo-stage">
+          <span class="comic-impact-demo-word" data-comic-impact="live">Pow!</span>
+        </div>
+        <details class="demo-controls" open></details>
+      </section>
+
+      <section class="demo-section">
+        <h2>Impact wall</h2>
+        <p class="demo-note">
+          Each word owns one scroll-scrubbed layer. The annotation enters, holds and exits as its
+          panel crosses the viewport.
+        </p>
+        <p class="demo-scroll-hint">Scroll</p>
+        <div class="comic-impact-demo-scroller">
+          <div class="demo-panel comic-impact-demo-card">
+            <span class="comic-impact-demo-word" data-comic-impact="bam">Bam!</span>
+          </div>
+          <div class="demo-panel comic-impact-demo-card">
+            <span class="comic-impact-demo-word" data-comic-impact="wham">Wham!</span>
+          </div>
+          <div class="demo-panel comic-impact-demo-card">
+            <span class="comic-impact-demo-word" data-comic-impact="crash">Crash!</span>
+          </div>
+          <div class="demo-panel comic-impact-demo-card">
+            <span class="comic-impact-demo-word" data-comic-impact="zap">Zap!</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <pre class="demo-code">
+import { createComicImpact } from './effects/comic-impact';
+import './effects/comic-impact/effect.css';
+
+const word = document.querySelector&lt;HTMLElement&gt;('#impact-word')!;
+
+const impact = createComicImpact(word, {
+  shape: 'starburst',
+  fill: '#ffd23f',
+  ink: '#12100e',
+  inkWidth: 4,
+  points: 12,
+  irregularity: 0.35,
+  speedLines: 14,
+  offset: 6,
+  pop: 0.45,
+  shake: 3,
+  rotation: -8,
+  trigger: 'inview',
+  duration: 900,
+  seed: 1,
+});
+
+impact.replay();
+impact.setOptions({ shape: 'spike', fill: '#ef476f' });
+impact.destroy();
+</pre>
+      </section>
+    </main>
+
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>

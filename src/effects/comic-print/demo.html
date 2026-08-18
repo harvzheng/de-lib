@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comic Print — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Comic Print</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS + SVG &middot; look</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Look</p>
+        <h1>Cheap ink.<br />Big colour.</h1>
+        <p>
+          Live DOM, stills and video pushed through a limited-palette press: angled dot screens,
+          split colour plates, rough ink edges and a fixed paper grain.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <h2>One press, three kinds of content</h2>
+        <p class="demo-note">
+          The same static CSS/SVG treatment sits over selectable text, an accessible image and a
+          playing video. Switch palettes without rebuilding the content.
+        </p>
+        <div class="comic-print-demo-grid">
+          <article class="demo-panel comic-print-demo-card" data-comic-print="text">
+            <h3>City in Panic!</h3>
+            <p>
+              Witnesses report a streak of yellow light above the elevated line. Officials insist
+              there is no cause for alarm.
+            </p>
+          </article>
+          <figure class="demo-panel comic-print-demo-media">
+            <div class="comic-print-demo-surface" data-comic-print="image">
+              <img src="/media/shot-b.jpg" alt="A golden retriever at an outdoor market." />
+            </div>
+            <figcaption class="comic-print-demo-label">Plate 02 / Still</figcaption>
+          </figure>
+          <figure class="demo-panel comic-print-demo-media">
+            <div class="comic-print-demo-surface" data-comic-print="video">
+              <video
+                src="/media/sample-1920.mp4"
+                poster="/media/sample-poster.jpg"
+                muted
+                loop
+                autoplay
+                playsinline
+                aria-label="Silent sample footage reproduced as a moving comic panel."
+              ></video>
+            </div>
+            <figcaption class="comic-print-demo-label">Plate 03 / Live video</figcaption>
+          </figure>
+        </div>
+        <details class="demo-controls" open></details>
+      </section>
+
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <pre class="demo-code">
+import { createComicPrint } from './effects/comic-print';
+import './effects/comic-print/effect.css';
+
+const panel = document.querySelector&lt;HTMLElement&gt;('#panel')!;
+
+const print = createComicPrint(panel, {
+  palette: 'newsprint',
+  dotSize: 4,
+  halftone: 0.55,
+  screenAngle: 15,
+  levels: 5,
+  misregistration: 1.5,
+  grain: 0.4,
+  paper: '#f4ecd8',
+  roughness: 0.3,
+  contrast: 1.15,
+});
+
+print.setOptions({ palette: 'sunday' });
+print.destroy();
+</pre>
+      </section>
+    </main>
+
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>

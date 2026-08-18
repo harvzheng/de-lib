@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+
+# Demo sample footage. These are multi-megabyte binaries and nothing in the
+# pack depends on this particular clip — every video effect takes any video —
+# so they are regenerated locally. See public/media/README.md for the commands.
+# The .jpg stills stay tracked: they are small, and the gallery card art and
+# six of the nine demos reference them directly.
+public/media/*.mp4

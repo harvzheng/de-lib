@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scribble Highlight — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Scribble Highlight</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>SVG &middot; annotation</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Annotation</p>
+        <h1>
+          Scribble it like you
+          <span class="scribble-demo-target" data-scribble="hero">meant it</span>
+        </h1>
+        <p>
+          Six separate crayon drawings, cycled on twos. Every boil frame is redrawn from scratch
+          rather than wobbled, so the outline crawls the way rough animation does — then it breaks
+          up and leaves.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <h2>Live</h2>
+        <p class="demo-note">
+          <code>flutterOut</code> is on here, so the drawing erases itself a couple of beats after
+          it lands. Hit <em>Replay</em> to run the draw-on again.
+        </p>
+        <div class="demo-panel scribble-demo-cell">
+          <h3>every knob</h3>
+          <p><span class="scribble-demo-target" data-scribble="live">read this bit</span></p>
+        </div>
+        <details class="demo-controls" open></details>
+      </section>
+
+      <section class="demo-section">
+        <h2>Variants</h2>
+        <p class="demo-note">
+          Seven base geometries, each roughened by the same hand. The wall runs with
+          <code>flutterOut: false</code> so you can sit and watch the boil.
+        </p>
+        <div class="demo-panel scribble-demo-wall" data-scribble="wall"></div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Scrubbed by scroll</h2>
+        <p class="demo-note">
+          <code>trigger: 'scroll'</code> maps scroll position onto the whole timeline: the line
+          draws on as the target rises, holds, then flutters off as it leaves.
+        </p>
+        <p class="demo-scroll-hint">Scroll</p>
+        <div class="scribble-demo-scroller">
+          <div class="demo-panel scribble-demo-cell">
+            <h3>trigger: scroll</h3>
+            <p>
+              <span class="scribble-demo-target" data-scribble="scroll">drawn as you arrive</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Trace a subject</h2>
+        <p class="demo-note">
+          The reference shot: a hand-authored polygon in the still's own box space, scribbled around
+          the dog and scrubbed by scroll. <code>trace</code> takes points as 0..1 pairs, so the same
+          outline holds at any size.
+        </p>
+        <figure class="demo-panel scribble-demo-shot" data-scribble="trace">
+          <img
+            src="/media/shot-a.jpg"
+            alt="A golden retriever sitting on a lead at a busy outdoor market."
+          />
+        </figure>
+      </section>
+
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <pre class="demo-code">
+import { createScribbleHighlight } from './effects/scribble-highlight';
+import './effects/scribble-highlight/effect.css';
+
+const claim = document.querySelector&lt;HTMLElement&gt;('#claim')!;
+
+const handle = createScribbleHighlight(claim, {
+  variant: 'circle',
+  color: 'var(--amber)',
+  strokeWidth: 4,
+  frames: 6,
+  fps: 12,
+  jitter: 5,
+  passes: 2,
+  trigger: 'inview',
+  duration: 700,
+});
+
+handle.setOptions({ variant: 'underline' });
+handle.replay();
+
+// Trace a subject inside a still: points are 0..1 in the target's own box.
+const shot = document.querySelector&lt;HTMLElement&gt;('#shot')!;
+
+createScribbleHighlight(shot, {
+  variant: 'trace',
+  color: 'var(--amber)',
+  strokeWidth: 5,
+  padding: 0,
+  trigger: 'scroll',
+  scroll: { start: 0.85, end: 0.5 },
+  flutterOut: false,
+  path: [
+    [0.532, 0.067],
+    [0.686, 0.291],
+    [0.762, 0.847],
+    [0.504, 0.999],
+    [0.395, 0.46],
+    [0.446, 0.145],
+  ],
+});
+
+handle.destroy();
+</pre>
+      </section>
+    </main>
+
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>

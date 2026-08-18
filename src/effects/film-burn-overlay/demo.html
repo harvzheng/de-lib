@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Film Burn Overlay: a sustained burn-and-light-leak treatment over an image, scrubbed by scroll — CSS, blend modes, and one SVG filter, no WebGL."
+    />
+    <title>Film Burn Overlay — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Film Burn Overlay</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS &middot; SVG &middot; overlay</span>
+    </nav>
+    <main class="demo-shell">
+      <div class="demo-hero">
+        <p class="demo-kicker">Overlay — CSS, blend modes &amp; an SVG filter, no WebGL</p>
+        <h1>Film Burn Overlay</h1>
+        <p>
+          A sustained burn-and-light-leak layer over a single image: holes bloom open and stay
+          charred, embers crawl and flicker, light leaks sweep and drift, and the frame breathes
+          as you scroll through it. Think of a strip of film that sat too long in the gate, not a
+          cut between two shots.
+        </p>
+        <span class="demo-scroll-hint">Scroll to burn it</span>
+      </div>
+
+      <div class="film-burn-overlay-demo-scroller" aria-hidden="true"></div>
+
+      <section class="demo-section">
+        <figure class="film-burn-overlay-demo-shot" id="shot">
+          <img src="/media/shot-b.jpg" alt="A dog on a leash, walked along a city street." />
+        </figure>
+      </section>
+
+      <div class="film-burn-overlay-demo-scroller" aria-hidden="true"></div>
+
+      <section class="demo-section">
+        <h2>Drop it over an image</h2>
+        <p class="demo-note">
+          Give it a host element containing an <code class="demo-inline-code">&lt;img&gt;</code>
+          and it treats that image in place — no wrapper markup, no second copy of the picture.
+        </p>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/film-burn-overlay/effect.css';
+import { createFilmBurnOverlay } from './effects/film-burn-overlay';
+
+const effect = createFilmBurnOverlay(host, {
+  intensity: 0.7,
+  leak: 0.6,
+  holes: 4,
+});
+
+// Later — on unmount, route change, or teardown.
+effect.destroy();</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/film-burn-overlay/demo.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "web-effects-pack",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An effects & transitions pack for the web — film burns, filmstock grading, hand-drawn scribbles — built with CSS, HTML and WebGL.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:lib": "rm -rf dist/lib && for f in src/effects/*/index.ts; do LIB_SLUG=$(basename $(dirname $f)) vite build --config vite.lib.config.ts || exit 1; done",
+    "preview": "vite preview",
+    "check": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1"
+  }
+}

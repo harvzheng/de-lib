@@ -1,0 +1,129 @@
+/*
+ * Film Burn Overlay. `--p` (scroll/manual progress) is the one value CSS
+ * derives things from directly — the image's parallax/zoom transform and the
+ * vignette are each a single `calc()` off it. Hole geometry, ember flicker,
+ * and light-leak drift each combine a transform *and* an opacity *and* (for
+ * embers/leaks) elapsed time on the same element, so those are resolved in
+ * JS straight onto `style.opacity` / `style.transform` — see `index.ts`.
+ */
+
+.film-burn-overlay-stage {
+  isolation: isolate;
+  overflow: hidden;
+  background: #000;
+}
+
+.film-burn-overlay-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateY(calc(var(--p) * var(--parallax) * -1px)) scale(calc(1 + var(--p) * var(--zoom)));
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.film-burn-overlay-char {
+  mix-blend-mode: multiply;
+}
+
+.film-burn-overlay-ember {
+  mix-blend-mode: screen;
+}
+
+.film-burn-overlay-leak {
+  mix-blend-mode: screen;
+}
+
+.film-burn-overlay-grain {
+  mix-blend-mode: overlay;
+  opacity: var(--grain);
+  background-repeat: repeat;
+  background-size: 180px 180px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.film-burn-overlay-vignette {
+  background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgb(0 0 0 / 85%) 100%);
+  opacity: calc(var(--intensity) * (0.4 + var(--p) * 0.35));
+}
+
+/*
+ * Burn holes: one element per hole. `left`/`top`/`width`/`height` are written
+ * once per rebuild (seed/hole-count/resize); `opacity` and `transform` are
+ * written on every progress change and, for embers, on every flicker tick —
+ * both in `index.ts`, not here, since they mix a scale transform with a
+ * time- and progress-dependent opacity on the same element.
+ */
+
+.film-burn-overlay-hole {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  /* Both the scale and the opacity are rewritten on every progress change, and the
+     ember opacity again on every flicker tick. Each hole needs its own compositing
+     layer for that: otherwise the char hole's SVG roughening filter re-rasterises
+     at every new scale, and the ember opacity re-rasterises the blurred `ember`
+     container over the whole frame. */
+  will-change: transform, opacity;
+}
+
+.film-burn-overlay-hole--char {
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--char-color) 0%,
+    color-mix(in srgb, var(--char-color) 55%, transparent) 58%,
+    transparent 100%
+  );
+}
+
+.film-burn-overlay-hole--ember {
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 0%,
+    transparent 60%,
+    var(--burn-color) 74%,
+    color-mix(in srgb, var(--burn-color) 35%, transparent) 88%,
+    transparent 100%
+  );
+}
+
+/*
+ * Light leaks: three soft blobs. `width`/`height`/`filter` (blur) are written
+ * once per resize; `transform` (drift and progress sweep) and `opacity` are
+ * written on every progress change and drift tick, in `index.ts`.
+ */
+
+.film-burn-overlay-leak-blob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0;
+  background: radial-gradient(circle, var(--leak-color) 0%, transparent 72%);
+  /* Drift moves these every tick and each one carries a blur of ~9% of the frame's
+     short side. Without its own layer that blur re-rasterises on every move. */
+  will-change: transform, opacity;
+}
+
+/* --- demo page only (src/effects/film-burn-overlay/demo.html) --- */
+
+.film-burn-overlay-demo-shot {
+  position: relative;
+  display: block;
+  margin: 0;
+  aspect-ratio: 1.896;
+}
+
+.film-burn-overlay-demo-shot > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.film-burn-overlay-demo-scroller {
+  padding: 55vh 0;
+}

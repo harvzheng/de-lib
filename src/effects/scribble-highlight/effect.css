@@ -1,0 +1,89 @@
+/*
+ * Scribble Highlight. The overlay is decoration: it never takes pointer events
+ * and it is hidden from assistive tech, so the annotated element keeps its own
+ * accessible name.
+ */
+
+.scribble-layer {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.scribble-svg {
+  position: absolute;
+  display: block;
+  /* Jitter, filter displacement and flutter drift all leave the viewBox; an SVG
+     root clips to it by default. */
+  overflow: visible;
+}
+
+.scribble-stroke {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Without fill-box, an SVG rotate pivots on the viewBox origin and the
+     fluttering stroke swings across the frame instead of tumbling in place. */
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* --- demo page only (src/effects/scribble-highlight/demo.html) --- */
+
+.scribble-demo-target {
+  position: relative;
+  display: inline-block;
+}
+
+.scribble-demo-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1px;
+  /* Paper, not rule colour: an odd variant count leaves an empty track, and a
+     rule-coloured grid background would show it as a filled cell. */
+  background: var(--paper-2);
+}
+
+.scribble-demo-cell {
+  padding: 2.6rem 1.5rem;
+  background: var(--paper-2);
+  /* Outlines meet inside the 1px gap, so shared edges read as one rule; the
+     panel's own `overflow: hidden` trims the outer ones. */
+  outline: 1px solid var(--line);
+}
+
+.scribble-demo-cell > h3 {
+  margin: 0 0 1.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.scribble-demo-cell > p {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  line-height: 1.9;
+}
+
+.scribble-demo-shot {
+  position: relative;
+  display: block;
+  margin: 0;
+  aspect-ratio: 1.896;
+}
+
+.scribble-demo-shot > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scribble-demo-scroller {
+  padding: 45vh 0;
+}

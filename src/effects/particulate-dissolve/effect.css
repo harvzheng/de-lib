@@ -1,0 +1,126 @@
+/* Particulate Dissolve renderer layers. */
+
+.particulate-dissolve-stack {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.particulate-dissolve-body,
+.particulate-dissolve-canvas,
+.particulate-dissolve-flecks {
+  width: 100%;
+  height: 100%;
+}
+
+.particulate-dissolve-media-body,
+.particulate-dissolve-canvas,
+.particulate-dissolve-flecks {
+  position: absolute;
+  inset: 0;
+}
+
+.particulate-dissolve-live-body {
+  position: relative;
+}
+
+.particulate-dissolve-media-body > img,
+.particulate-dissolve-media-body > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.particulate-dissolve-canvas,
+.particulate-dissolve-flecks {
+  display: block;
+  pointer-events: none;
+}
+
+.particulate-dissolve-canvas[hidden] {
+  display: none;
+}
+
+/* --- demo page only (src/effects/particulate-dissolve/demo.html) --- */
+
+.particulate-dissolve-demo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1px;
+  padding: 1px;
+  background: var(--line);
+}
+
+.particulate-dissolve-demo-panel {
+  min-width: 0;
+  background: var(--paper-2);
+}
+
+.particulate-dissolve-demo-label {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.particulate-dissolve-demo-live {
+  min-height: 30rem;
+  padding: clamp(1.4rem, 4vw, 3rem);
+  color: var(--ink);
+  background:
+    linear-gradient(120deg, rgb(255 255 255 / 4%), transparent 45%),
+    var(--paper);
+}
+
+.particulate-dissolve-demo-live h3 {
+  max-width: 12ch;
+  margin: 0 0 1.2rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 4rem);
+  line-height: 0.93;
+}
+
+.particulate-dissolve-demo-live p {
+  max-width: 40rem;
+  line-height: 1.65;
+}
+
+.particulate-dissolve-demo-live blockquote {
+  margin: 2rem 0 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--ember);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.particulate-dissolve-demo-image {
+  min-height: 30rem;
+  background:
+    linear-gradient(rgb(8 12 18 / 12%), rgb(8 12 18 / 48%)),
+    url('/media/shot-c.jpg') center / cover;
+}
+
+.particulate-dissolve-demo-readout {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--ember);
+}
+
+.particulate-dissolve-demo-spacer {
+  height: 36vh;
+}
+
+@media (max-width: 820px) {
+  .particulate-dissolve-demo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .particulate-dissolve-demo-live,
+  .particulate-dissolve-demo-image {
+    min-height: 26rem;
+  }
+}

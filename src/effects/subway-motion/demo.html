@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Subway Motion: night-train light, reflection, and fast foreground motion over live text and imagery using CSS transforms, gradients, blend modes, and optional SVG glass distortion."
+    />
+    <title>Subway Motion — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Subway Motion</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS &middot; SVG &middot; no Canvas or WebGL</span>
+    </nav>
+
+    <main class="demo-shell">
+      <div class="demo-hero">
+        <p class="demo-kicker">Overlay — transforms, gradients &amp; blend modes</p>
+        <h1>Subway Motion</h1>
+        <p>
+          The host stays the subject. This effect adds the darkness, passing light, glass
+          reflection, and heavy lateral rhythm of a night train to markup you already own.
+          Switch perspective to move from inside the carriage to the platform edge.
+        </p>
+      </div>
+
+      <section class="demo-section" aria-labelledby="live-hosts-title">
+        <h2 id="live-hosts-title">One treatment, two kinds of content</h2>
+        <p class="demo-note">
+          The left host is selectable text and real HTML. The right is an ordinary image. Both
+          remain in place while the same effect layers composite above them.
+        </p>
+
+        <div class="subway-motion-demo-grid">
+          <article class="subway-motion-demo-host subway-motion-demo-story" id="story-host">
+            <p class="demo-kicker">Last service &middot; 00:47</p>
+            <h2>The city keeps moving after the windows go black.</h2>
+            <p>
+              Names of stations arrive as pale interruptions. Between them, the carriage becomes
+              a mirror: tired faces, handrails, and the low pulse of tunnels passing underneath.
+            </p>
+          </article>
+
+          <figure class="subway-motion-demo-host subway-motion-demo-media" id="media-host">
+            <img
+              src="/media/shot-c.jpg"
+              alt="A golden retriever looking up beside a red-draped table."
+            />
+            <figcaption class="subway-motion-demo-caption">Caller-owned image</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Drop it over existing markup</h2>
+        <p class="demo-note">
+          Import the stylesheet once, then pass any positioned or unpositioned host to the factory.
+          The runtime promotes a static host to a positioning context without replacing its content.
+        </p>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/subway-motion/effect.css';
+import { createSubwayMotion } from './effects/subway-motion';
+
+const effect = createSubwayMotion(host, {
+  perspective: 'window',
+  speed: 1,
+  intensity: 0.8,
+  rain: 0.25,
+});
+
+// Switch perspective without rebuilding the host.
+effect.setOptions({ perspective: 'platform' });
+
+// Later — on unmount, route change, or teardown.
+effect.destroy();</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/subway-motion/demo.ts"></script>
+  </body>
+</html>

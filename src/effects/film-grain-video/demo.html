@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Regrade any live video as Kodak Gold 200 on 35mm with projector stutter, halation, grain, gate weave and print wear."
+    />
+    <title>Filmstock Video Background — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <div id="filmstock-background" class="filmstock-demo-background" aria-hidden="true"></div>
+
+    <div class="filmstock-demo-page">
+      <nav class="demo-nav" aria-label="Demo navigation">
+        <a href="/">Web Effects Pack</a>
+        <span aria-hidden="true">/</span>
+        <strong>Filmstock Video</strong>
+        <span class="demo-nav-spacer"></span>
+        <span id="compare-state" class="filmstock-demo-compare-note">Kodak Gold 200</span>
+      </nav>
+
+      <main class="demo-shell">
+        <header class="demo-hero">
+          <p class="demo-kicker">
+            WebGL or Canvas 2D · SVG filters · CSS — renderer <span id="active">auto</span>
+          </p>
+          <h1>Any video. One roll of Gold 200.</h1>
+          <p>
+            A 16 fps sample-and-hold, per-channel stock curves, amber halation and heavy
+            mid-tone grain — live over footage you can replace with your own.
+          </p>
+        </header>
+
+        <section class="demo-section" aria-labelledby="own-footage-title">
+          <h2 id="own-footage-title">Run your own footage</h2>
+          <p class="demo-note">
+            Nothing is pre-rendered. Pick any local video and the same live Canvas and SVG
+            stack takes over. The file never leaves your browser.
+          </p>
+          <div class="demo-panel filmstock-demo-file-panel">
+            <div class="filmstock-demo-file-copy">
+              <strong>Source reel</strong>
+              <span id="source-status" aria-live="polite">sample-1920.mp4</span>
+            </div>
+            <label class="filmstock-demo-file-label">
+              Load a video
+              <input
+                id="source-file"
+                class="filmstock-demo-file-input"
+                type="file"
+                accept="video/*"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section class="demo-section" aria-labelledby="stack-title">
+          <h2 id="stack-title">A film stack, not a preset</h2>
+          <p class="demo-note">
+            Toggle <strong>Show original</strong> in the rack to put the live source above the
+            effect. The colour difference comes from independent channel curves and dye-layer
+            cross-talk — not <code>sepia()</code> or <code>hue-rotate()</code>.
+          </p>
+        </section>
+
+        <section class="demo-section" aria-labelledby="usage-title">
+          <h2 id="usage-title">Drop it in</h2>
+          <pre class="demo-code"><code>import './effect.css';
+import { createFilmGrainVideo } from './index';
+
+const film = createFilmGrainVideo(background, {
+  src: '/media/footage.mp4',
+  poster: '/media/poster.jpg',
+  fps: 16,
+  look: 'kodak-gold-200',
+});
+
+film.setOptions({ grain: 1.1, speed: 0.8 });
+await film.setSource(fileUrl);
+film.destroy();</code></pre>
+        </section>
+      </main>
+
+      <details id="filmstock-controls" class="demo-controls" open></details>
+    </div>
+
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>

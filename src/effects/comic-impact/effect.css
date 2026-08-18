@@ -1,0 +1,105 @@
+/* Comic Impact decoration stays behind the caller-owned, accessible text. */
+
+.comic-impact-target {
+  isolation: isolate;
+}
+
+.comic-impact-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.comic-impact-svg {
+  display: block;
+  overflow: visible;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.comic-impact-burst {
+  stroke-linejoin: bevel;
+}
+
+.comic-impact-svg--cloud .comic-impact-burst,
+.comic-impact-svg--cloud .comic-impact-shadow {
+  stroke-linejoin: round;
+}
+
+.comic-impact-shadow {
+  opacity: 0.28;
+}
+
+.comic-impact-speed-line {
+  stroke-linecap: round;
+}
+
+/* Demo page only. */
+
+.comic-impact-demo-hero-word,
+.comic-impact-demo-word {
+  position: relative;
+  display: inline-block;
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.comic-impact-demo-hero-word {
+  margin-inline: 0.15em;
+  color: #f8f1df;
+  text-shadow: 4px 4px 0 #12100e;
+}
+
+.comic-impact-demo-stage {
+  display: grid;
+  min-height: 22rem;
+  place-items: center;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 18% 22%, rgb(18 16 14 / 8%) 0 1px, transparent 1.5px) 0 0 / 9px 9px,
+    #f4ecd8;
+}
+
+.comic-impact-demo-stage .comic-impact-demo-word {
+  color: #f8f1df;
+  font-size: clamp(4.6rem, 17vw, 11rem);
+  -webkit-text-stroke: 2px #12100e;
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 #12100e;
+}
+
+.comic-impact-demo-scroller {
+  display: grid;
+  gap: 65vh;
+  padding: 50vh 0;
+}
+
+.comic-impact-demo-card {
+  display: grid;
+  min-height: 18rem;
+  place-items: center;
+  overflow: visible;
+  background: #f4ecd8;
+}
+
+.comic-impact-demo-card .comic-impact-demo-word {
+  color: #fff8e8;
+  font-size: clamp(3.8rem, 13vw, 8rem);
+  -webkit-text-stroke: 2px #12100e;
+  paint-order: stroke fill;
+  text-shadow: 4px 4px 0 #12100e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comic-impact-svg {
+    will-change: auto;
+  }
+}

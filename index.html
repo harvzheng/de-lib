@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Web Effects Pack: drop-in film burns, filmstock grading, and hand-drawn annotation for the browser — zero dependencies, real CSS/SVG/WebGL over your DOM."
+    />
+    <title>Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav">
+      <strong>Web Effects Pack</strong>
+      <span class="demo-nav-spacer"></span>
+      <span id="effect-count" class="gallery-count"></span>
+    </nav>
+    <main class="demo-shell">
+      <div class="demo-hero gallery-hero">
+        <div class="gallery-hero-copy">
+          <p class="demo-kicker">Effects &amp; transitions pack — for the web</p>
+          <h1>Looks and transitions, not components.</h1>
+          <p>
+            Every entry here is a film burn, a filmstock grade, or a hand-drawn annotation — the
+            kind of thing you would buy for Premiere or Resolve — except it runs as real
+            HTML/CSS/SVG/WebGL and composites live over your DOM, images, and video. Zero runtime
+            dependencies, one factory call over markup you already have.
+          </p>
+        </div>
+        <div class="gallery-hero-art" aria-hidden="true">
+          <div class="gallery-hero-strip"></div>
+        </div>
+      </div>
+
+      <div id="catalogue"></div>
+
+      <section class="demo-section">
+        <h2>Drop one in</h2>
+        <p class="demo-note">
+          Every effect exposes the same shape — a factory over an existing element, and a single
+          teardown method.
+        </p>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/&lt;slug&gt;/effect.css';
+import { createSomething } from './effects/&lt;slug&gt;';
+
+const effect = createSomething(element, options);
+
+// Later — on unmount, route change, or teardown.
+effect.destroy();</code></pre>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Building your own</h2>
+        <p class="demo-note">
+          Adding an effect to the pack — factory shape, rendering-strategy preference, the
+          manifest entry — is documented in <code>README.md</code> at the root of the repo.
+        </p>
+      </section>
+
+      <footer class="gallery-footer">
+        <p class="demo-note">Zero runtime dependencies. Copy the source or build the library.</p>
+      </footer>
+    </main>
+    <script type="module" src="/src/demo/gallery.ts"></script>
+  </body>
+</html>

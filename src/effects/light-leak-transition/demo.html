@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Light Leak Transition — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Light Leak Transition</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>WebGL &middot; CSS/SVG &middot; transition</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Transition</p>
+        <h1>Light leak transition</h1>
+        <p>
+          A red-orange film fog rolls in from the frame edge, catches the outgoing shot's
+          highlights, and carries the cut inside the flare. Nothing here is pre-rendered: the leak
+          is generated live, either as a fragment shader or as blurred CSS gradients blended over
+          both shots through SVG filters.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <p class="demo-scroll-hint">Scroll into the leak</p>
+      </section>
+    </main>
+
+    <section
+      id="light-leak"
+      class="light-leak-transition-demo-scroller"
+      aria-label="Scroll-scrubbed light leak transition"
+    ></section>
+
+    <main class="demo-shell">
+      <section class="demo-section">
+        <h2>One flare, two cuts</h2>
+        <p class="demo-note">
+          The live style is <span id="active-style" class="light-leak-transition-demo-readout">flash</span>,
+          rendering with <span id="active-renderer" class="light-leak-transition-demo-readout">…</span>.
+          Flash hides the shot swap inside a near-white overexposure. Sweep keeps both shots
+          readable while three warm bands crossfade the incoming frame underneath. Both return to
+          an untouched shot at either end, in either renderer.
+        </p>
+      </section>
+
+      <section class="demo-section">
+        <h2>The two shots</h2>
+        <div class="light-leak-transition-demo-strip demo-panel">
+          <figure>
+            <img src="/media/shot-a.jpg" alt="" />
+            <figcaption>from — shot-a.jpg</figcaption>
+          </figure>
+          <figure>
+            <img src="/media/shot-c.jpg" alt="" />
+            <figcaption>to — shot-c.jpg</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <pre class="demo-code">
+import './effects/light-leak-transition/effect.css';
+import { createLightLeakTransition } from './effects/light-leak-transition';
+
+const leak = createLightLeakTransition(document.querySelector('#light-leak'), {
+  from: '/media/shot-a.jpg',
+  to: '/media/shot-c.jpg',
+  style: 'flash',
+  direction: 'left',
+  intensity: 0.85,
+  bloom: 0.7,
+  warmth: 0.5,
+  softness: 80,
+  organic: 0.4,
+  halation: 0.45,
+  grain: 0.3,
+  seed: 1,
+});
+
+leak.setOptions({ style: 'sweep', direction: 'right' });
+
+// Drive it yourself instead of by scroll.
+leak.setOptions({ scroll: false });
+leak.setProgress(0.5);
+
+leak.destroy();</pre
+        >
+        <p class="demo-note">
+          Every option and default is documented in
+          <code>src/effects/light-leak-transition/README.md</code>.
+        </p>
+      </section>
+    </main>
+
+    <details class="demo-controls" id="controls"></details>
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>

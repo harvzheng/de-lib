@@ -1,0 +1,207 @@
+/*
+ * Light Leak Transition. Both renderers build the same box: one stack layer over
+ * the host and one pinned frame inside it, holding either the media layers and
+ * gradient stack (CSS) or a single canvas (WebGL).
+ */
+
+.light-leak-transition-frame {
+  position: sticky;
+  top: var(--light-leak-transition-pin-top, 0px);
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #000;
+}
+
+.light-leak-transition-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.light-leak-transition-layer,
+.light-leak-transition-halation {
+  position: absolute;
+  inset: 0;
+}
+
+.light-leak-transition-layer > img,
+.light-leak-transition-layer > video,
+.light-leak-transition-halation > img,
+.light-leak-transition-halation > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.light-leak-transition-to {
+  z-index: 0;
+}
+
+.light-leak-transition-from {
+  z-index: 1;
+  opacity: var(--from-opacity, 1);
+  filter: brightness(calc(1 + var(--exposure, 0) + var(--exposure, 0)))
+    saturate(calc(1 - var(--exposure, 0)));
+  transform: translateZ(0);
+}
+
+.light-leak-transition-halation {
+  z-index: 2;
+  opacity: var(--halation-opacity, 0);
+  mix-blend-mode: screen;
+}
+
+.light-leak-transition-leak {
+  z-index: 3;
+  opacity: 0;
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+}
+
+.light-leak-transition-leak-content,
+.light-leak-transition-flash-body,
+.light-leak-transition-flash-core,
+.light-leak-transition-sweep-band {
+  position: absolute;
+  inset: 0;
+}
+
+.light-leak-transition-leak-content {
+  will-change: transform;
+}
+
+.light-leak-transition-flash-body {
+  background:
+    radial-gradient(
+      ellipse 32% 78% at 50% 50%,
+      rgb(255 249 224 / 0.96) 0%,
+      var(--leak-amber) 22%,
+      var(--leak-red) 52%,
+      rgb(104 0 8 / 0.4) 68%,
+      transparent 82%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 18%,
+      color-mix(in srgb, var(--leak-red) 76%, transparent) 38%,
+      color-mix(in srgb, var(--leak-amber) 86%, transparent) 52%,
+      transparent 82%
+    );
+  filter: blur(var(--softness, 80px));
+  mix-blend-mode: screen;
+}
+
+.light-leak-transition-flash-core {
+  inset: 12%;
+  opacity: var(--core-opacity, 0);
+  background: radial-gradient(
+    ellipse 68% 86% at 50% 50%,
+    white 0%,
+    rgb(255 252 240 / 0.99) 35%,
+    rgb(255 245 211 / 0.96) 56%,
+    var(--leak-amber) 74%,
+    transparent 100%
+  );
+  filter: blur(calc(var(--softness, 80px) + 18px));
+  mix-blend-mode: color-dodge;
+  /* --core-opacity moves every frame. Without its own compositing layer the change
+     counts as a content change of the blurred, SVG-filtered leak subtree, and both
+     this ~98px blur and the body's ~80px blur re-rasterise on every frame. */
+  will-change: opacity;
+}
+
+.light-leak-transition-sweep-band {
+  inset: -18%;
+  background: linear-gradient(
+    90deg,
+    transparent calc(50% - var(--band-width, 28%)),
+    color-mix(in srgb, var(--band-color) 72%, transparent) 45%,
+    color-mix(in srgb, white 58%, var(--band-color)) 50%,
+    color-mix(in srgb, var(--band-color) 74%, transparent) 55%,
+    transparent calc(50% + var(--band-width, 28%))
+  );
+  filter: blur(var(--softness, 80px));
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.light-leak-transition-sweep-band:nth-child(3) {
+  --band-color: var(--leak-red);
+}
+
+.light-leak-transition-sweep-band:nth-child(4) {
+  --band-color: var(--leak-amber);
+  mix-blend-mode: color-dodge;
+}
+
+.light-leak-transition-sweep-band:nth-child(5) {
+  --band-color: var(--leak-magenta);
+}
+
+.light-leak-transition-stage[data-style='flash'] .light-leak-transition-sweep-band,
+.light-leak-transition-stage[data-style='sweep'] .light-leak-transition-flash-body,
+.light-leak-transition-stage[data-style='sweep'] .light-leak-transition-flash-core {
+  display: none;
+}
+
+.light-leak-transition-grain {
+  z-index: 4;
+  opacity: var(--grain-opacity, 0);
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Demo-only presentation. */
+
+.light-leak-transition-demo-scroller {
+  position: relative;
+  height: 320vh;
+  background: #000;
+}
+
+.light-leak-transition-demo-readout {
+  color: var(--ember);
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+.light-leak-transition-demo-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+}
+
+.light-leak-transition-demo-strip figure {
+  margin: 0;
+  background: var(--paper-2);
+}
+
+.light-leak-transition-demo-strip img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.896;
+  object-fit: cover;
+}
+
+.light-leak-transition-demo-strip figcaption {
+  padding: 0.6rem 0.8rem;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .light-leak-transition-demo-strip {
+    grid-template-columns: 1fr;
+  }
+}

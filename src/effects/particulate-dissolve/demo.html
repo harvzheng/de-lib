@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Particulate Dissolve — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Particulate Dissolve</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS/SVG &middot; Canvas 2D &middot; WebGL &middot; scroll effect</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Disintegration</p>
+        <h1>Particulate dissolve</h1>
+        <p>
+          A surface breaks into ash, shears along a noisy edge, and drifts out of the frame. Scroll
+          in either direction: every fleck is reconstructed from its seed and progress, so the same
+          point in the scrub is always the same frame.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <p class="demo-scroll-hint">Scroll through both dissolves</p>
+        <div class="particulate-dissolve-demo-spacer" aria-hidden="true"></div>
+        <div class="particulate-dissolve-demo-grid demo-panel">
+          <article class="particulate-dissolve-demo-panel">
+            <p class="particulate-dissolve-demo-label">Live DOM &middot; CSS/SVG + Canvas 2D</p>
+            <div id="live-dissolve" class="particulate-dissolve-demo-live">
+              <p class="demo-kicker">Field note 06</p>
+              <h3>The weather kept the evidence.</h3>
+              <p>
+                This is selectable text, emphasis, and <a href="#usage">a real link</a> inside the
+                effect. The CSS renderer thresholds one static turbulence field over the live
+                markup; the canvas only carries the ash that has detached.
+              </p>
+              <blockquote>Nothing was rasterised to make this disappear.</blockquote>
+            </div>
+          </article>
+
+          <article class="particulate-dissolve-demo-panel">
+            <p class="particulate-dissolve-demo-label">Media &middot; renderer switch</p>
+            <div
+              id="image-dissolve"
+              class="particulate-dissolve-demo-image"
+              role="img"
+              aria-label="A landscape dissolves to reveal another landscape"
+            ></div>
+          </article>
+        </div>
+        <p class="demo-note">
+          The media side requested <span id="requested">auto</span> and is currently using
+          <span id="active" class="particulate-dissolve-demo-readout">…</span>. The live-markup side
+          always uses CSS/SVG because a WebGL canvas cannot sample arbitrary DOM.
+        </p>
+        <div class="particulate-dissolve-demo-spacer" aria-hidden="true"></div>
+      </section>
+
+      <section class="demo-section" id="usage">
+        <h2>Usage</h2>
+        <pre class="demo-code">
+import './effects/particulate-dissolve/effect.css';
+import { createParticulateDissolve } from './effects/particulate-dissolve';
+
+// Omit src to dissolve selectable text and arbitrary live markup.
+const copy = createParticulateDissolve(document.querySelector('#article'), {
+  renderer: 'css',
+  direction: 'up',
+});
+
+// Media can use the per-pixel WebGL upgrade when WebGL2 is available.
+const image = createParticulateDissolve(document.querySelector('#still'), {
+  src: '/media/shot-a.jpg',
+  renderer: 'auto',
+  grain: 6,
+  seed: 1,
+});
+
+image.activeRenderer; // 'webgl' or 'css'
+
+// Manual scrubbing is deterministic in either direction.
+image.setOptions({ scroll: false });
+image.setProgress(0.6);
+image.setProgress(0.3);
+image.setProgress(0.6);
+
+copy.destroy();
+image.destroy();</pre
+        >
+      </section>
+    </main>
+
+    <details class="demo-controls" id="controls"></details>
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>
