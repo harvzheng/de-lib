@@ -37,6 +37,9 @@ const effect = createFilmGrainVideo(demoBackground, {
 let objectUrl: string | null = null;
 let comparing = false;
 let rawVideo: HTMLVideoElement | null = null;
+/** The rack's flicker switch and its level are separate, so switching back on restores the level. */
+let flickerOn = true;
+let flickerAmount = 0.2;
 
 function syncComparison(): void {
   rawVideo?.remove();
@@ -135,69 +138,89 @@ createControls(controlsRack, 'Filmstock', [
     onInput: (value) => effect.setOptions({ vignette: value }),
   },
   {
-    kind: 'range',
+    kind: 'group',
     label: 'Flicker',
-    min: 0,
-    max: 1,
-    step: 0.05,
-    value: 0.2,
-    format: (value) => value.toFixed(2),
-    onInput: (value) => effect.setOptions({ flicker: value }),
-  },
-  {
-    kind: 'select',
-    label: 'Flicker style',
-    options: [
-      { label: 'Exposure', value: 'exposure' },
-      { label: 'Projector', value: 'projector' },
-      { label: 'Mixed', value: 'mixed' },
+    controls: [
+      {
+        kind: 'toggle',
+        label: 'Enabled',
+        value: true,
+        onInput: (value) => {
+          flickerOn = value;
+          effect.setOptions({ flicker: value ? flickerAmount : 0 });
+        },
+      },
+      {
+        kind: 'range',
+        label: 'Amount',
+        min: 0,
+        max: 1,
+        step: 0.05,
+        value: 0.2,
+        format: (value) => value.toFixed(2),
+        onInput: (value) => {
+          flickerAmount = value;
+          // Moving the amount while flicker is switched off sets the level it will come
+          // back at, rather than silently switching it on.
+          if (flickerOn) effect.setOptions({ flicker: value });
+        },
+      },
+      {
+        kind: 'select',
+        label: 'Style',
+        options: [
+          { label: 'Exposure', value: 'exposure' },
+          { label: 'Projector', value: 'projector' },
+          { label: 'Mixed', value: 'mixed' },
+        ],
+        value: 'mixed',
+        onInput: (value) => {
+          const flickerStyle =
+            value === 'projector' ? 'projector' : value === 'mixed' ? 'mixed' : 'exposure';
+          effect.setOptions({ flickerStyle });
+        },
+      },
+      {
+        kind: 'range',
+        label: 'Rate',
+        min: 0,
+        max: 4,
+        step: 0.1,
+        value: 1.2,
+        format: (value) => `${value.toFixed(1)}/s`,
+        onInput: (value) => effect.setOptions({ flickerRate: value }),
+      },
+      {
+        kind: 'range',
+        label: 'Flash',
+        min: 0,
+        max: 1,
+        step: 0.05,
+        value: 0.35,
+        format: (value) => value.toFixed(2),
+        onInput: (value) => effect.setOptions({ flash: value }),
+      },
+      {
+        kind: 'range',
+        label: 'Shutter band',
+        min: 0,
+        max: 1,
+        step: 0.05,
+        value: 0.3,
+        format: (value) => value.toFixed(2),
+        onInput: (value) => effect.setOptions({ shutterBand: value }),
+      },
+      {
+        kind: 'range',
+        label: 'Colour breathing',
+        min: 0,
+        max: 1,
+        step: 0.05,
+        value: 0.25,
+        format: (value) => value.toFixed(2),
+        onInput: (value) => effect.setOptions({ colorBreathing: value }),
+      },
     ],
-    value: 'mixed',
-    onInput: (value) => {
-      const flickerStyle =
-        value === 'projector' ? 'projector' : value === 'mixed' ? 'mixed' : 'exposure';
-      effect.setOptions({ flickerStyle });
-    },
-  },
-  {
-    kind: 'range',
-    label: 'Flicker rate',
-    min: 0,
-    max: 4,
-    step: 0.1,
-    value: 1.2,
-    format: (value) => `${value.toFixed(1)}/s`,
-    onInput: (value) => effect.setOptions({ flickerRate: value }),
-  },
-  {
-    kind: 'range',
-    label: 'Flash',
-    min: 0,
-    max: 1,
-    step: 0.05,
-    value: 0.35,
-    format: (value) => value.toFixed(2),
-    onInput: (value) => effect.setOptions({ flash: value }),
-  },
-  {
-    kind: 'range',
-    label: 'Shutter band',
-    min: 0,
-    max: 1,
-    step: 0.05,
-    value: 0.3,
-    format: (value) => value.toFixed(2),
-    onInput: (value) => effect.setOptions({ shutterBand: value }),
-  },
-  {
-    kind: 'range',
-    label: 'Colour breathing',
-    min: 0,
-    max: 1,
-    step: 0.05,
-    value: 0.25,
-    format: (value) => value.toFixed(2),
-    onInput: (value) => effect.setOptions({ colorBreathing: value }),
   },
   {
     kind: 'range',

@@ -196,7 +196,17 @@ pre.demo-code {
   bottom: 1rem;
   z-index: 90;
   width: 15.5rem;
-  padding: 0.35rem 0.85rem 0.85rem;
+  /*
+   * The rack is pinned to the bottom of the viewport and grows upward, so a rack
+   * taller than the viewport used to run off the top edge with no way to reach the
+   * controls up there - the page behind scrolls, the rack does not. Capping it and
+   * scrolling its own overflow is what makes a fifteen-knob effect usable.
+   */
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  /* A rack that has hit its end must not hand the wheel to the page behind it. */
+  overscroll-behavior: contain;
+  padding: 0 0.85rem 0.85rem;
   font-size: 0.78rem;
   color: var(--ink-dim);
   background: rgb(19 17 16 / 88%);
@@ -210,12 +220,42 @@ pre.demo-code {
 }
 
 .demo-controls > summary {
-  padding: 0.5rem 0;
+  /* Sticky inside the rack's own scroll box: the title is the only affordance that
+     says which effect these knobs belong to, so it cannot scroll away. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -0.85rem;
+  padding: 0.85rem 0.85rem 0.5rem;
   font-size: 0.7rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink);
+  background: rgb(19 17 16 / 92%);
   cursor: pointer;
+}
+
+.demo-control-group {
+  border-top: 1px solid var(--line);
+}
+
+.demo-control-group > summary {
+  padding: 0.45rem 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+
+.demo-control-group[open] > summary {
+  color: var(--ink);
+}
+
+/* Indented so an open group reads as belonging to its heading rather than as a
+   continuation of the flat list above it. */
+.demo-control-group > .demo-control {
+  padding-left: 0.55rem;
 }
 
 .demo-control {

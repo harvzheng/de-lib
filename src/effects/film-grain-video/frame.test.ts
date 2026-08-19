@@ -121,3 +121,26 @@ describe('filmstock grade tables', () => {
     expect(samples[samples.length - 1]).toBeLessThan(1);
   });
 });
+
+describe('filmstock flicker switch', () => {
+  test('flicker 0 holds exposure and fires no projector flashes, whatever the style', () => {
+    for (const flickerStyle of ['exposure', 'projector', 'mixed'] as const) {
+      const state = createFrameState();
+      for (let frame = 0; frame < 900; frame += 1) {
+        updateFrameState(state, frame, { ...CONFIG, flicker: 0, flickerStyle }, 1280, 800, false);
+        expect(state.exposure).toBe(1);
+        expect(state.flashOpacity).toBe(0);
+      }
+    }
+  });
+
+  test('the same settings with flicker on do fire flashes, so the switch is what stopped them', () => {
+    const state = createFrameState();
+    let flashes = 0;
+    for (let frame = 0; frame < 900; frame += 1) {
+      updateFrameState(state, frame, { ...CONFIG, flicker: 0.6, flickerStyle: 'projector' }, 1280, 800, false);
+      if (state.flashOpacity > 0) flashes += 1;
+    }
+    expect(flashes).toBeGreaterThan(0);
+  });
+});

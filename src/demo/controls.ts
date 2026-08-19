@@ -36,7 +36,24 @@ export interface ButtonControl extends ControlBase {
   onInput: () => void;
 }
 
-export type Control = RangeControl | ToggleControl | SelectControl | ButtonControl;
+/**
+ * A collapsible sub-rack. Effects with a large knob count (the filmstock has
+ * fifteen) overflow the fixed rack otherwise, and a reader hunting one control
+ * should not have to scroll past every other one to reach it.
+ */
+export interface GroupControl extends ControlBase {
+  kind: 'group';
+  controls: Control[];
+  /** Collapsed by default: a group only earns its space when the reader opens it. */
+  open?: boolean;
+}
+
+export type Control =
+  | RangeControl
+  | ToggleControl
+  | SelectControl
+  | ButtonControl
+  | GroupControl;
 
 /**
  * Renders a collapsible rack of controls into `host` (expected to be a
@@ -62,64 +79,76 @@ export function createControls(host: HTMLElement, title: string, controls: Contr
   summary.textContent = title;
   host.append(summary);
 
-  for (const control of controls) {
-    const row = document.createElement('div');
-    row.className = 'demo-control';
+  for (const control of controls) host.append(buildControl(control));
+}
 
-    if (control.kind === 'button') {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = control.label;
-      button.addEventListener('click', () => control.onInput());
-      row.append(button);
-      host.append(row);
-      continue;
-    }
-
-    const label = document.createElement('label');
-    label.textContent = control.label;
-
-    if (control.kind === 'range') {
-      const input = document.createElement('input');
-      const readout = document.createElement('output');
-      const format = control.format ?? ((value: number) => String(value));
-      input.type = 'range';
-      input.min = String(control.min);
-      input.max = String(control.max);
-      input.step = String(control.step);
-      input.value = String(control.value);
-      readout.textContent = format(control.value);
-      input.addEventListener('input', () => {
-        const value = Number(input.value);
-        readout.textContent = format(value);
-        control.onInput(value);
-      });
-      label.htmlFor = input.id = uid();
-      row.append(label, readout, input);
-    } else if (control.kind === 'toggle') {
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.checked = control.value;
-      input.addEventListener('input', () => control.onInput(input.checked));
-      label.htmlFor = input.id = uid();
-      row.classList.add('is-toggle');
-      row.append(input, label);
-    } else {
-      const select = document.createElement('select');
-      for (const option of control.options) {
-        const el = document.createElement('option');
-        el.value = option.value;
-        el.textContent = option.label;
-        select.append(el);
-      }
-      select.value = control.value;
-      select.addEventListener('input', () => control.onInput(select.value));
-      label.htmlFor = select.id = uid();
-      row.append(label, select);
-    }
-
-    host.append(row);
+function buildControl(control: Control): HTMLElement {
+  if (control.kind === 'group') {
+    const group = document.createElement('details');
+    group.className = 'demo-control-group';
+    group.open = control.open ?? false;
+    const summary = document.createElement('summary');
+    summary.textContent = control.label;
+    group.append(summary);
+    for (const child of control.controls) group.append(buildControl(child));
+    return group;
   }
+
+  const row = document.createElement('div');
+  row.className = 'demo-control';
+
+  if (control.kind === 'button') {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = control.label;
+    button.addEventListener('click', () => control.onInput());
+    row.append(button);
+    return row;
+  }
+
+  const label = document.createElement('label');
+  label.textContent = control.label;
+
+  if (control.kind === 'range') {
+    const input = document.createElement('input');
+    const readout = document.createElement('output');
+    const format = control.format ?? ((value: number) => String(value));
+    input.type = 'range';
+    input.min = String(control.min);
+    input.max = String(control.max);
+    input.step = String(control.step);
+    input.value = String(control.value);
+    readout.textContent = format(control.value);
+    input.addEventListener('input', () => {
+      const value = Number(input.value);
+      readout.textContent = format(value);
+      control.onInput(value);
+    });
+    label.htmlFor = input.id = uid();
+    row.append(label, readout, input);
+  } else if (control.kind === 'toggle') {
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = control.value;
+    input.addEventListener('input', () => control.onInput(input.checked));
+    label.htmlFor = input.id = uid();
+    row.classList.add('is-toggle');
+    row.append(input, label);
+  } else {
+    const select = document.createElement('select');
+    for (const option of control.options) {
+      const el = document.createElement('option');
+      el.value = option.value;
+      el.textContent = option.label;
+      select.append(el);
+    }
+    select.value = control.value;
+    select.addEventListener('input', () => control.onInput(select.value));
+    label.htmlFor = select.id = uid();
+    row.append(label, select);
+  }
+
+  return row;
 }
 
 let seq = 0;

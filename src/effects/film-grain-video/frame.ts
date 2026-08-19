@@ -115,7 +115,11 @@ function updateProjector(
   const projectorRandom = mulberry32((frame * 0x85ebca6b + 0xc2b2ae35) >>> 0);
   // Poisson: the chance at least one event lands inside this frame's slice.
   const eventChance = 1 - Math.exp(-config.flickerRate / config.fps);
-  if (projectorRandom() >= eventChance || config.flash <= 0) {
+  // `flicker` is the master switch for brightness instability, so zero has to stop
+  // the flashes too, not just the exposure jitter - otherwise there is no single
+  // value that turns flicker off. The shutter band and colour breathing above are
+  // not brightness flicker and keep their own amounts.
+  if (config.flicker <= 0 || projectorRandom() >= eventChance || config.flash <= 0) {
     state.flashOpacity = 0;
     return;
   }

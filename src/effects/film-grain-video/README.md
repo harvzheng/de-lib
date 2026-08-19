@@ -39,7 +39,7 @@ The host supplies the box. Whichever renderer is active, its drawing surface fol
 | `halation` | `number` | `0.5` | Amber-red highlight bleed from 0 to 1. Zero disables the halation layer. |
 | `gateWeave` | `number` | `0.4` | Stepped gate drift and occasional mechanical jump from 0 to 1. |
 | `vignette` | `number` | `0.45` | Edge-darkening strength from 0 to 1. |
-| `flicker` | `number` | `0.2` | Exposure variation per held frame from 0 to 1. |
+| `flicker` | `number` | `0.2` | Exposure variation per held frame from 0 to 1, and the master switch for brightness instability: `flicker: 0` turns flicker off outright, including the projector flashes, whatever `flickerStyle` and `flash` are set to. The shutter band and colour breathing are not brightness flicker and keep their own amounts. |
 | `flickerStyle` | `'exposure' \| 'projector' \| 'mixed'` | `'exposure'` | Selects exposure instability, projector artefacts with low resting exposure jitter, or a restrained combination of both. |
 | `flickerRate` | `number` | `1.2` | Average projector flash events per second. |
 | `flash` | `number` | `0.35` | Strength of rare bright and dark full-frame projector flashes from 0 to 1. |

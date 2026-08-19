@@ -46,7 +46,11 @@ export interface FilmGrainVideoOptions {
   gateWeave?: number;
   /** Vignette strength, 0..1. Default 0.45. */
   vignette?: number;
-  /** Exposure flicker per held frame, 0..1. Default 0.2. */
+  /**
+   * Exposure flicker per held frame, 0..1. Default 0.2. Also the master switch for
+   * brightness instability: 0 turns flicker off outright, projector flashes
+   * included, whatever `flickerStyle` and `flash` say.
+   */
   flicker?: number;
   /** What kind of flicker to apply. Default 'exposure' — the current behaviour. */
   flickerStyle?: FlickerStyle;
