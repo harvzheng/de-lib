@@ -1,0 +1,144 @@
+/*
+ * Crumpled Paper. Two renderers share one stack.
+ *
+ * WebGL: a single canvas, composited with straight alpha and no blend mode — the
+ * shader paints toward shadow where the sheet turns away, toward the paper's lit
+ * tone where it faces the light, and paints nothing where the sheet is flat.
+ *
+ * CSS/SVG: five layers, each doing one job in one blend mode — paper tone, the lit
+ * sheet, the ridge sheen, dirt in the folds, fibre grain. Every layer that carries a
+ * lighting filter needs an opaque background: lighting primitives write alpha 1
+ * across the whole filter subregion, and the filter's closing
+ * `feComposite operator="in"` clips that back to the layer's own alpha.
+ *
+ * Nothing here is written per frame. `index.ts` and the renderers write filter
+ * attributes or redraw the quad when an option changes, and — only if `lightShift`
+ * is set — the light angle on scroll.
+ */
+
+.crumpled-paper-stack {
+  /* No `isolation: isolate` here, deliberately: isolating makes the stack its own
+     compositing group, and the CSS renderer's children would then blend against the
+     stack's own transparent backdrop instead of the host's content — which is the
+     entire point of every blend mode below. */
+  overflow: hidden;
+}
+
+.crumpled-paper-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.crumpled-paper-tone,
+.crumpled-paper-sheet,
+.crumpled-paper-sheen,
+.crumpled-paper-soil,
+.crumpled-paper-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Each of these three carries the baked height map as its own background; the
+   filter on it turns that map into shading, sheen, or soiling. An opaque
+   background is required: lighting primitives write alpha 1 across the whole
+   filter subregion, and each filter's closing `feComposite operator="in"` clips
+   that back to the layer's own alpha. */
+.crumpled-paper-sheet,
+.crumpled-paper-sheen,
+.crumpled-paper-soil {
+  background-color: #000;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* Paper stock. Toning first means the shading below lands on paper, not on print. */
+.crumpled-paper-tone {
+  mix-blend-mode: color;
+}
+
+/* The lit sheet: white where a facet faces the light, grey where it faces away.
+   Multiply keeps the lit faces neutral and only darkens the turned ones. */
+.crumpled-paper-sheet {
+  mix-blend-mode: multiply;
+}
+
+/* Specular creases. Screen, because a sheen adds light and cannot remove any. */
+.crumpled-paper-sheen {
+  mix-blend-mode: screen;
+}
+
+/* Where the sheet never went flat again: dirt as much as shade. */
+.crumpled-paper-soil {
+  opacity: 0;
+  mix-blend-mode: multiply;
+}
+
+.crumpled-paper-grain {
+  opacity: 0;
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-size: 150px 150px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- demo page only (src/effects/crumpled-paper/demo.html) --- */
+
+.crumpled-paper-demo-sheet {
+  position: relative;
+  padding: clamp(1.6rem, 5vw, 4rem);
+  background: #fbf7ee;
+  color: #241f18;
+}
+
+.crumpled-paper-demo-sheet h2,
+.crumpled-paper-demo-sheet p,
+.crumpled-paper-demo-sheet figure {
+  max-width: 38rem;
+  margin-inline: auto;
+}
+
+.crumpled-paper-demo-sheet figure {
+  margin-block: 1.6rem 0;
+}
+
+.crumpled-paper-demo-sheet img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.896;
+  object-fit: cover;
+  filter: grayscale(0.35) contrast(1.08);
+}
+
+.crumpled-paper-demo-sheet figcaption {
+  margin-top: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6c6252;
+}
+
+.crumpled-paper-demo-shot {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: #0a0c11;
+}
+
+.crumpled-paper-demo-shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.896;
+  object-fit: cover;
+}
+
+.crumpled-paper-demo-readout {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--ember);
+}

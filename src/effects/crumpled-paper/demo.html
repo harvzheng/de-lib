@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Crumpled Paper: whatever is in the host ends up printed on a sheet that was screwed up and flattened out again — real lit creases from SVG filters, no texture image, no WebGL."
+    />
+    <title>Crumpled Paper — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Crumpled Paper</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>WebGL &middot; SVG &middot; overlay</span>
+    </nav>
+
+    <main class="demo-shell">
+      <div class="demo-hero">
+        <p class="demo-kicker">Overlay — WebGL, with an SVG-lighting fallback</p>
+        <h1>Crumpled Paper</h1>
+        <p>
+          Whatever is in the host ends up looking printed on a sheet that was screwed up in a fist
+          and flattened out again: straight creases, soft panels between them catching the light at
+          different angles, fibre grain, and the darkening left where the sheet never went flat. The
+          creases are real shading, not a texture image — a height map lit by a distant light — so
+          the whole sheet turns when you move the light instead of pretending to.
+        </p>
+      </div>
+
+      <section class="demo-section">
+        <h2>Over live text</h2>
+        <p class="demo-note">
+          The block below is real, selectable HTML under the sheet. Select it, resize the window,
+          read it in devtools: nothing was rasterised to make this happen.
+        </p>
+      </section>
+    </main>
+
+    <section id="sheet" class="crumpled-paper-demo-sheet">
+      <h2>Notes from the field</h2>
+      <p>
+        Paper does not crease evenly, and it does not crease in curves. A crumpled sheet is made of
+        straight creases of finite length, with soft panels between them that never went flat again.
+        This effect builds exactly that — creases and panels as shapes, summed into a height map —
+        because noise cannot produce a straight line, and a sheet without straight lines reads as
+        stucco no matter how it is lit.
+      </p>
+      <p>
+        Everything under here is a normal document — headings, paragraphs, an image with its own
+        grade. The sheet is five composited layers above it, and the content itself is dragged a few
+        pixels along the creases so the print goes over the ridges rather than floating above them.
+      </p>
+      <figure>
+        <img src="/media/shot-b.jpg" alt="A dog on a leash, walked along a city street." />
+        <figcaption>Printed on the same sheet</figcaption>
+      </figure>
+    </section>
+
+    <main class="demo-shell">
+      <section class="demo-section">
+        <h2>Over a photograph</h2>
+        <p class="demo-note">
+          Same effect, same options, a different host — here it reads as a print that has been
+          folded into a pocket and taken back out. Light angle
+          <span id="angle" class="crumpled-paper-demo-readout">135°</span>, rendering with
+          <span id="active" class="crumpled-paper-demo-readout">…</span>.
+        </p>
+      </section>
+    </main>
+
+    <figure id="shot" class="crumpled-paper-demo-shot">
+      <img src="/media/shot-c.jpg" alt="A dog looking up, tongue out, at a market stall." />
+    </figure>
+
+    <main class="demo-shell">
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/crumpled-paper/effect.css';
+import { createCrumpledPaper } from './effects/crumpled-paper';
+
+const paper = createCrumpledPaper(host, {
+  scale: 240,      // px across a panel
+  depth: 0.6,
+  creases: 0.65,   // creases against soft panels
+  light: 135,      // degrees, clockwise from the left
+  shine: 0.3,
+  warp: 2,         // px the content is dragged along the creases
+});
+
+// Let the sheet catch the light as the reader scrolls.
+paper.setOptions({ lightShift: 60 });
+
+// Later — on unmount, route change, or teardown.
+paper.destroy();</code></pre>
+        </div>
+        <p class="demo-note">
+          Every option is documented in
+          <code class="demo-inline-code">src/effects/crumpled-paper/README.md</code>, including what
+          `warp` does to the host element.
+        </p>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/crumpled-paper/demo.ts"></script>
+  </body>
+</html>
