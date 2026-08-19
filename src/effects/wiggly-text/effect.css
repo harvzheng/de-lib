@@ -1,0 +1,92 @@
+/*
+ * Wiggly Text. The effect itself injects no elements and needs no classes: the
+ * runtime writes a single `filter` value on the host, and the wiggle is carried
+ * by attribute writes inside that filter. What is left here is the one thing a
+ * caller genuinely has to know about, plus the demo page's own chrome.
+ *
+ * A filtered element is a containing block for fixed and absolute descendants,
+ * and it establishes a stacking context. That is a property of CSS `filter`, not
+ * of this effect, but it is the one way dropping this on an existing layout can
+ * move something: pin a host's absolutely-positioned children to an ancestor
+ * instead, or wiggle an inner element.
+ */
+
+/* --- demo page only (src/effects/wiggly-text/demo.html) --- */
+
+.wiggly-text-demo-specimen {
+  margin: 0 0 1.5rem;
+  /* Anonymous system stacks, a serif, and a monospace: the effect must not care. */
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.wiggly-text-demo-specimen--serif {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.wiggly-text-demo-specimen--mono {
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 3.2vw, 1.9rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wiggly-text-demo-specimen--tiny {
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.6;
+  max-width: 34rem;
+}
+
+.wiggly-text-demo-specimen--mixed {
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  font-weight: 400;
+}
+
+.wiggly-text-demo-specimen--mixed em {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.3em;
+}
+
+.wiggly-text-demo-specimen--mixed code {
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  background: var(--paper-2);
+  padding: 0.1em 0.3em;
+}
+
+.wiggly-text-demo-specimen--button {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.wiggly-text-demo-button {
+  font: inherit;
+  color: var(--paper);
+  background: var(--ink);
+  border: 0;
+  padding: 0.7em 1.4em;
+  cursor: pointer;
+}
+
+.wiggly-text-demo-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 0.35rem;
+}
+
+.wiggly-text-demo-readout {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--ember);
+}

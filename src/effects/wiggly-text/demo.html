@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Wiggly Text: type that wobbles like a hand-redrawn line, on any font and any string."
+    />
+    <title>Wiggly Text — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Wiggly Text</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS + SVG &middot; overlay</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Overlay &mdash; CSS + SVG, no WebGL</p>
+        <h1>Type that will not sit still</h1>
+        <p>
+          A hand redrawing the same line never draws it twice the same way. This displaces the
+          pixels the text already painted, so it knows nothing about fonts, glyphs or strings
+          &mdash; and the text underneath stays real: selectable, searchable and readable by a
+          screen reader.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <h2>Font-agnostic by construction</h2>
+        <p class="demo-note">
+          Every specimen below carries the same effect at the same settings. Nothing was measured,
+          split into characters or wrapped in a <code>&lt;span&gt;</code>. Try selecting the text,
+          or find it with your browser's search.
+        </p>
+
+        <p class="wiggly-text-demo-label">Heavy sans</p>
+        <p class="wiggly-text-demo-specimen" data-wiggle>Hand-lettered, sort of</p>
+
+        <p class="wiggly-text-demo-label">Italic serif</p>
+        <p class="wiggly-text-demo-specimen wiggly-text-demo-specimen--serif" data-wiggle>
+          A quieter voice
+        </p>
+
+        <p class="wiggly-text-demo-label">Monospace, tracked out</p>
+        <p class="wiggly-text-demo-specimen wiggly-text-demo-specimen--mono" data-wiggle>
+          Ship it 04:12
+        </p>
+
+        <p class="wiggly-text-demo-label">Mixed fonts, sizes and scripts in one host</p>
+        <p class="wiggly-text-demo-specimen wiggly-text-demo-specimen--mixed" data-wiggle>
+          Sans, <em>serif</em>, <code>mono</code>, 12345, &tau;&pi;, &#2361;&#2367;&#2306;&#2342;&#2368;,
+          &#x1F41B;
+        </p>
+
+        <p class="wiggly-text-demo-label">Body copy at 15px</p>
+        <p class="wiggly-text-demo-specimen wiggly-text-demo-specimen--tiny" data-wiggle>
+          Amplitude is a pixel count, not a fraction of the font size, so one setting that reads as
+          a lively wobble on a headline reads as a broken printer on body copy. Small text wants a
+          smaller amplitude and a shorter wavelength &mdash; and at this size the tearing that
+          amplitude causes on thin stems is the limit worth watching.
+        </p>
+
+        <p class="wiggly-text-demo-label">A real button, still clickable</p>
+        <p class="wiggly-text-demo-specimen wiggly-text-demo-specimen--button" data-wiggle>
+          <button class="wiggly-text-demo-button" type="button" id="wiggle-button">
+            Press me
+          </button>
+          <span id="wiggle-button-count" class="wiggly-text-demo-readout">0 presses</span>
+        </p>
+      </section>
+
+      <section class="demo-section">
+        <h2>Drive it yourself</h2>
+        <p class="demo-note">
+          Frame on screen now: <span id="wiggle-frame" class="wiggly-text-demo-readout">0</span>. A
+          boil is a short cycle of drawings, not a new random field every step &mdash; three
+          repeating drawings read as a human redrawing a line, an endless sequence of fresh ones
+          reads as television static.
+        </p>
+        <pre class="demo-code"><code>import { createWigglyText } from './effects/wiggly-text';
+
+const wiggle = createWigglyText(heading, {
+  amplitude: 2,     // px of peak excursion
+  wavelength: 90,   // px between wobbles
+  boil: 8,          // redraws per second; 0 holds one frame
+  frames: 3,        // drawings in the cycle
+});
+
+// Later — on unmount, route change, or teardown
+wiggle.destroy();</code></pre>
+      </section>
+
+      <p class="demo-note">
+        Every option is documented in
+        <code>src/effects/wiggly-text/README.md</code>, including what it does to small text.
+      </p>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/wiggly-text/demo.ts"></script>
+  </body>
+</html>
