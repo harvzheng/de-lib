@@ -1,0 +1,103 @@
+/*
+ * Bokeh. Both renderers build the same box: one blend layer over the host, with
+ * either one gradient element per disc (CSS) or one canvas (WebGL) inside it.
+ * Every class is namespaced by the slug.
+ *
+ * Per-frame writes are `transform` and `opacity` on the disc elements only —
+ * `index.ts`/`renderer-css.ts` resolve position, shimmer scale, and brightness
+ * together per disc, so there is nothing for CSS to derive from a progress
+ * variable here. `--bokeh-softness` and `--bokeh-rim` shape the gradient and are
+ * written on the layer only when the options change.
+ */
+
+.bokeh-layer {
+  --bokeh-softness: 0.7;
+  --bokeh-rim: 0.28;
+  /* Out-of-focus highlights are additive light, and screen leaves the host
+     content untouched wherever no disc landed — which is most of the box. The
+     host must not isolate, or the discs blend against nothing. */
+  mix-blend-mode: screen;
+  overflow: hidden;
+}
+
+.bokeh-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * One disc, one radial gradient. The aperture falloff is a gradient stop and not
+ * a `filter: blur()`: a blur on every disc re-rasterises the whole layer each
+ * time one of them moves, where a promoted gradient element costs one composite.
+ * `width`/`height`/`--bokeh-tint` are written on rebuild and resize;
+ * `transform`/`opacity` every frame.
+ */
+
+.bokeh-disc {
+  /* Nearly all of the radius is falloff at the default softness: a defocused
+     highlight is mostly penumbra, and a hard-edged disc reads as a sticker. */
+  --bokeh-fade: calc(6% + var(--bokeh-softness) * 92%);
+  --bokeh-rim-color: color-mix(in srgb, var(--bokeh-tint, #fff), #fff calc(var(--bokeh-rim) * 60%));
+  --bokeh-rim-alpha: calc(52% + var(--bokeh-rim) * 46%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  /* Alpha, not lightness, carries the profile: the body sits well under half
+     opaque so a disc adds light instead of fogging the content, and the ring is
+     the only near-opaque stop. The body stop is held well out toward the edge —
+     the shader flattens its plateau with a gamma for the same reason, since a
+     falloff that starts at the centre spreads a soft disc into nothing. */
+  background-image: radial-gradient(
+    circle closest-side,
+    color-mix(in srgb, var(--bokeh-tint, #fff) 26%, transparent) 0%,
+    color-mix(in srgb, var(--bokeh-tint, #fff) 34%, transparent)
+      max(0%, calc(100% - var(--bokeh-fade) * 0.85)),
+    color-mix(in srgb, var(--bokeh-rim-color) var(--bokeh-rim-alpha), transparent)
+      calc(100% - var(--bokeh-fade) * 0.35),
+    transparent 100%
+  );
+  will-change: transform, opacity;
+}
+
+/* --- demo page only (src/effects/bokeh/demo.html) --- */
+
+.bokeh-demo-shot {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: #05070c;
+}
+
+.bokeh-demo-shot > img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.896;
+  object-fit: cover;
+}
+
+.bokeh-demo-copy {
+  position: relative;
+  padding: 12vh 1.4rem;
+  background: linear-gradient(160deg, #0b1018, #131b28);
+  color: #e9eef7;
+}
+
+.bokeh-demo-copy h2,
+.bokeh-demo-copy p {
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.bokeh-demo-scroller {
+  height: 60vh;
+}
+
+.bokeh-demo-readout {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  color: var(--ember);
+}

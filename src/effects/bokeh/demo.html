@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Bokeh: defocused aperture highlights placed on the bright points detected in your own content, shimmering as you scroll — WebGL, with a CSS gradient renderer as the floor."
+    />
+    <title>Bokeh — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Bokeh</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>WebGL &middot; CSS &middot; overlay</span>
+    </nav>
+
+    <main class="demo-shell">
+      <div class="demo-hero">
+        <p class="demo-kicker">Overlay — WebGL, with a CSS gradient renderer</p>
+        <h1>Bokeh</h1>
+        <p>
+          Defocused highlights sitting in front of the page. The discs are not scattered at random:
+          the effect reads the picture once, finds the bright isolated points in it, and puts a disc
+          on each one, carrying that point's colour and brightness. A lamp becomes a lamp-shaped
+          bokeh, a dim reflection becomes a dim disc, and the field belongs to the frame instead of
+          sitting on top of it. Scrolling makes them shimmer.
+        </p>
+        <span class="demo-scroll-hint">Scroll to shimmer</span>
+      </div>
+
+      <div class="bokeh-demo-scroller" aria-hidden="true"></div>
+    </main>
+
+    <section id="bokeh">
+      <figure class="bokeh-demo-shot">
+        <img src="/media/shot-b.jpg" alt="A dog on a leash, walked along a city street." />
+      </figure>
+      <div class="bokeh-demo-copy">
+        <h2>Placed on the picture, not over it</h2>
+        <p>
+          <span id="anchored" class="bokeh-demo-readout">…</span> of the discs are sitting on a
+          highlight detected in the photograph above — the blown-out background, the reflections,
+          the gaps in the crowd. Pull <em>Follow highlights</em> down to zero in the control rack
+          and the same discs scatter into a free field, which is also what you get when there is no
+          readable source: no media in the host, or a cross-origin image the canvas cannot read.
+        </p>
+        <p>
+          A disc that sits on a highlight stays on it — a lamp does not slide across the frame
+          because you scrolled — so the scroll response there is the shimmer, while free discs also
+          drift. This paragraph is real text under the same overlay: no screenshot, no canvas copy
+          of the page.
+        </p>
+        <p>
+          Currently rendering with <span id="active" class="bokeh-demo-readout">…</span>. The WebGL
+          path draws each disc per pixel, so it is the one that can cut real aperture blades and
+          fringe the rim; the CSS path paints one gradient element per disc from the same list, so
+          both agree on where every disc is.
+        </p>
+      </div>
+    </section>
+
+    <main class="demo-shell">
+      <div class="bokeh-demo-scroller" aria-hidden="true"></div>
+
+      <section class="demo-section">
+        <h2>Drop it over anything</h2>
+        <p class="demo-note">
+          The host can hold an image, a video, or live text. Detection reads the first
+          <code class="demo-inline-code">&lt;img&gt;</code> or
+          <code class="demo-inline-code">&lt;video&gt;</code> inside the host once, on mount and on
+          resize — never per frame. The overlay is
+          <code class="demo-inline-code">aria-hidden</code> and never takes pointer events.
+        </p>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/bokeh/effect.css';
+import { createBokeh } from './effects/bokeh';
+
+const effect = createBokeh(host, {
+  renderer: 'auto',
+  source: 'auto',   // or an element, a selector, or 'none'
+  follow: 0.9,      // 0 scatters the discs instead
+  count: 20,
+  size: 0.16,
+  softness: 0.7,
+  shimmerRate: 7,
+});
+
+effect.activeRenderer; // 'webgl' or 'css'
+effect.anchoredCount;  // discs sitting on a detected highlight
+
+// After a video seeks, or the artwork behind it changes.
+effect.resample();
+
+// Later — on unmount, route change, or teardown.
+effect.destroy();</code></pre>
+        </div>
+        <p class="demo-note">
+          Every option is documented in
+          <code class="demo-inline-code">src/effects/bokeh/README.md</code>, including what the CSS
+          renderer gives up.
+        </p>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/bokeh/demo.ts"></script>
+  </body>
+</html>
