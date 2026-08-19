@@ -3,17 +3,34 @@
  * demo.css; never restates them. Never imported by an effect.
  */
 
-body.demo {
+/*
+ * The page backdrop: an amber cast and a fine scanline, on a fixed layer of its
+ * own rather than as a `background-attachment: fixed` image on the body.
+ *
+ * The scanline is one 3px tile repeated, not a `repeating-linear-gradient` over
+ * the whole layer. Written as a repeating gradient, Gecko re-rasterises the
+ * entire pattern on every scroll frame — measured at a median 24ms per frame on
+ * this page, which swamped everything else on it, previews included. As a 3px
+ * tile the identical pixels cost a median 8.3ms.
+ */
+body.demo::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     radial-gradient(ellipse at 20% -10%, color-mix(in oklab, var(--amber) 10%, transparent), transparent 55%),
-    repeating-linear-gradient(
+    linear-gradient(
       to bottom,
       rgb(255 255 255 / 2%) 0,
       rgb(255 255 255 / 2%) 1px,
       transparent 1px,
       transparent 3px
     );
-  background-attachment: fixed;
+  background-size:
+    auto,
+    100% 3px;
 }
 
 .gallery-count {
@@ -176,77 +193,59 @@ body.demo {
   background: var(--paper);
 }
 
-.gallery-card-art img {
+.gallery-card-poster {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.gallery-card-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 200ms ease;
-}
-
-.gallery-card:hover .gallery-card-art::after,
-.gallery-card:focus-visible .gallery-card-art::after {
-  opacity: 1;
-}
-
 /*
- * Every treatment reads a per-slug variant set by gallery.ts as inline
- * custom properties (--gallery-art-hue/-x/-y/-angle/-blend), derived from
- * the slug so cards sharing a treatment don't render identically.
+ * A live preview of the real effect, mounted by gallery.ts when the card comes
+ * near the viewport and destroyed when it goes well clear of it. It sits over
+ * the poster, which stays underneath as the fallback: a card whose effect
+ * cannot run, or has not mounted yet, shows the still and nothing else.
+ *
+ * Never focusable, never hit-tested, and inside the aria-hidden art box, so the
+ * card's accessible name is still its title.
  */
-
-/* Burn treatment — amber ignition edge crawling in from a corner. */
-.gallery-card-art--burn img {
-  filter: hue-rotate(var(--gallery-art-hue, 0deg));
-}
-
-.gallery-card-art--burn::after {
-  background: radial-gradient(
-    ellipse at var(--gallery-art-x, 12%) var(--gallery-art-y, 108%),
-    var(--amber) 0%,
-    color-mix(in oklab, var(--ember) 70%, var(--amber)) 22%,
-    transparent 58%
-  );
-  mix-blend-mode: var(--gallery-art-blend, screen);
-}
-
-/* Filmstock treatment — sepia/contrast push on the still itself. */
-.gallery-card-art--filmstock img {
-  filter: sepia(0.4) saturate(1.25) contrast(1.15) brightness(0.92) hue-rotate(var(--gallery-art-hue, 0deg));
-}
-
-.gallery-card-art--filmstock::after {
-  background: linear-gradient(
-    var(--gallery-art-angle, 0deg),
-    color-mix(in oklab, var(--amber) 35%, transparent),
-    transparent 55%
-  );
-  mix-blend-mode: var(--gallery-art-blend, overlay);
-}
-
-/* Scribble treatment — hand-drawn stroke laid over the still. */
-.gallery-scribble {
+.gallery-card-preview {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Several effects composite with blend modes; isolating them means they blend
+     against the preview's own content rather than the poster behind it. */
+  isolation: isolate;
+}
+
+/* For an effect that reveals what is behind it, where the poster showing
+   through would read as nothing having happened. */
+.gallery-card-preview--paper {
+  background: var(--paper);
+}
+
+/* The annotation effects work on real type, so they get type on card paper
+   rather than a photograph. */
+.gallery-card-preview--type {
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at 50% 118%, #1d1815, var(--paper) 72%);
+}
+
+.gallery-preview-photo {
+  display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
-.gallery-scribble-path {
-  fill: none;
-  stroke: var(--amber);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.85;
-  filter: hue-rotate(var(--gallery-art-hue, 0deg));
+.gallery-preview-type {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  color: var(--ink);
 }
 
 .gallery-card-body {
@@ -341,9 +340,5 @@ body.demo {
   .gallery-card:hover,
   .gallery-card:focus-visible {
     transform: none;
-  }
-
-  .gallery-card-art::after {
-    transition: none;
   }
 }

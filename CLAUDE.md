@@ -32,6 +32,12 @@ Per-effect implementation:
 | `subway-motion` | CSS blend-mode layers plus an SVG filter, no WebGL |
 | `comic-print` | SVG filters plus CSS, no WebGL |
 | `comic-impact` | SVG plus CSS, no WebGL |
+| `bokeh` | WebGL renderer **and** a CSS gradient renderer, selected via `renderer` option |
+| `ripped-page` | CSS `clip-path` plus two SVG filters, no WebGL |
+| `crumpled-paper` | WebGL renderer (per-pixel max-of-cones sheet) **and** a Canvas 2D + SVG lighting renderer, selected via `renderer` option |
+| `street-light` | CSS blend-mode layers only (multiply night, overlay contrast, screen light), no SVG, no WebGL |
+| `neon-sign` | CSS `text-shadow` stack plus two blend-mode gradient layers, no SVG, no WebGL |
+| `wiggly-text` | CSS `filter` plus four SVG filter primitives on the host's own pixels, no WebGL |
 
 ## Commands
 

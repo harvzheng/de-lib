@@ -111,6 +111,17 @@ export const EFFECTS: EffectMeta[] = [
     demo: '/src/effects/comic-print/demo.html',
   },
   {
+    slug: 'bokeh',
+    title: 'Bokeh',
+    category: 'overlay',
+    blurb:
+      'Defocused highlights sitting on the bright points of your own picture, each in that point\'s colour, shimmering as the reader scrolls.',
+    tech: ['webgl', 'css'],
+    tags: ['overlay', 'bokeh', 'lens', 'scroll', 'content-aware'],
+    scrollDriven: true,
+    demo: '/src/effects/bokeh/demo.html',
+  },
+  {
     slug: 'comic-impact',
     title: 'Comic Impact',
     category: 'annotation',
@@ -120,5 +131,60 @@ export const EFFECTS: EffectMeta[] = [
     tags: ['annotation', 'comic', 'impact', 'scroll'],
     scrollDriven: true,
     demo: '/src/effects/comic-impact/demo.html',
+  },
+  {
+    slug: 'ripped-page',
+    title: 'Ripped Page',
+    category: 'transition',
+    blurb:
+      'The shot on screen is a printed page: it tears across, the fibres let go, and the halves pull apart to reveal the next one.',
+    tech: ['svg', 'css'],
+    tags: ['transition', 'paper', 'tear', 'scroll'],
+    scrollDriven: true,
+    demo: '/src/effects/ripped-page/demo.html',
+  },
+  {
+    slug: 'crumpled-paper',
+    title: 'Crumpled Paper',
+    category: 'overlay',
+    blurb:
+      'Your content printed on a sheet that was screwed up and flattened out again — irregular panels, creases where they meet, fibre tooth.',
+    tech: ['webgl', 'svg', 'canvas2d', 'css'],
+    tags: ['overlay', 'paper', 'texture', 'lighting'],
+    scrollDriven: false,
+    demo: '/src/effects/crumpled-paper/demo.html',
+  },
+  {
+    slug: 'wiggly-text',
+    title: 'Wiggly Text',
+    category: 'annotation',
+    blurb:
+      'Type that will not sit still — a hand redrawing the same line a few times a second, on any font, any size, any script.',
+    tech: ['svg', 'css'],
+    tags: ['annotation', 'text', 'wiggle', 'hand-drawn'],
+    scrollDriven: false,
+    demo: '/src/effects/wiggly-text/demo.html',
+  },
+  {
+    slug: 'street-light',
+    title: 'Street Light',
+    category: 'overlay',
+    blurb:
+      'One lamp on a mast, standing still while the page walks underneath: whatever is under the pool is lit warm and hard, and the rest of the street is cold and dark.',
+    tech: ['css'],
+    tags: ['overlay', 'light', 'night', 'scroll'],
+    scrollDriven: true,
+    demo: '/src/effects/street-light/demo.html',
+  },
+  {
+    slug: 'neon-sign',
+    title: 'Neon Sign',
+    category: 'overlay',
+    blurb:
+      'Your own heading, wired to the mains: a hot glass core inside a gas halo, buzzing and dropping out, pooling its light on whatever is behind it.',
+    tech: ['css'],
+    tags: ['overlay', 'text', 'glow', 'night'],
+    scrollDriven: false,
+    demo: '/src/effects/neon-sign/demo.html',
   },
 ];
