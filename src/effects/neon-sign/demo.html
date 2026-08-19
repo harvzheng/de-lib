@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Neon Sign: the host's own text lit as a bent glass tube, with a buzz, dropouts, and light that spills onto whatever it sits on."
+    />
+    <title>Neon Sign — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Neon Sign</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS blend modes &middot; overlay</span>
+    </nav>
+
+    <main class="demo-shell">
+      <header class="demo-hero">
+        <p class="demo-kicker">Overlay &mdash; CSS only, no SVG, no WebGL</p>
+        <h1>Text that is wired to the mains</h1>
+        <p>
+          The sign is your own heading. Nothing is measured, split or duplicated: the tube is the
+          host's live text, the glow is a stack of blurred copies of it, and the pool of light
+          underneath is two blend-mode layers that light the page rather than sit on it.
+        </p>
+      </header>
+
+      <section class="demo-section">
+        <h2>Any font, any string</h2>
+        <p class="demo-note">
+          One shared set of options drives every line below. A heavy sans, an italic serif, a
+          tracked-out monospace in small caps, and a line that changes font mid-sentence all light
+          the same way, because the effect never asks what the glyphs are.
+        </p>
+
+        <p class="neon-sign-demo-label">Heavy sans</p>
+        <p class="neon-sign-demo-specimen" data-neon>Open all night</p>
+
+        <p class="neon-sign-demo-label">Italic serif</p>
+        <p class="neon-sign-demo-specimen neon-sign-demo-specimen--script" data-neon>
+          Cocktails &amp; Bar
+        </p>
+
+        <p class="neon-sign-demo-label">Monospace, small caps, tracked out</p>
+        <p class="neon-sign-demo-specimen neon-sign-demo-specimen--mono" data-neon>
+          vacancy &mdash; room 12
+        </p>
+
+        <p class="neon-sign-demo-label">Three fonts, three sizes, one host</p>
+        <p class="neon-sign-demo-specimen neon-sign-demo-specimen--mixed" data-neon>
+          Last orders <em>at</em> <code>02:00</code>
+        </p>
+      </section>
+
+      <section class="demo-section">
+        <h2>It lights what it sits on</h2>
+        <p class="demo-note">
+          The spill is the difference between a sign in a room and a sign floating in front of one.
+          Turn <code>spill</code> down to zero and the photograph goes back to how it was shot; turn
+          it up and the light lands on the pavement.
+        </p>
+
+        <figure class="neon-sign-demo-shot">
+          <img src="/media/shot-b.jpg" alt="A dog on a leash, walked along a city street." />
+          <p class="neon-sign-demo-shot-sign" data-neon>Late Night Diner</p>
+        </figure>
+      </section>
+
+      <section class="demo-section">
+        <h2>Still real text</h2>
+        <p class="demo-note">
+          Select any of the signs above with the mouse or the keyboard. The readout below is
+          <code>getSelection()</code> reporting what it actually got: the sign's characters, in
+          order, as authored. A screen reader gets the same string, since no text was copied into a
+          second element and no character was wrapped.
+        </p>
+
+        <div class="neon-sign-demo-panel">
+          <p class="neon-sign-demo-readout" id="neon-selection" role="status">
+            Nothing selected yet.
+          </p>
+          <p class="neon-sign-demo-readout" id="neon-brightness">Tube output: &mdash;</p>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <pre class="demo-code">
+import { createNeonSign } from './effects/neon-sign';
+
+const sign = createNeonSign(document.querySelector('h1'), {
+  color: '#ff2e63',
+  glowRadius: 18,
+  spill: 0.55,
+  flicker: 0.3,
+});
+
+sign.setOptions({ lit: false }); // cold grey glass, no glow
+sign.destroy();</pre
+        >
+        <p class="demo-note">
+          Under <code>prefers-reduced-motion: reduce</code> the sign stays lit and glowing and stops
+          buzzing &mdash; the treatment is the point, the flicker is the motion. Toggle the
+          preference in system settings and this page follows without a reload.
+        </p>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/neon-sign/demo.ts"></script>
+  </body>
+</html>

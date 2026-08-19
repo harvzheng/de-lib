@@ -1,0 +1,205 @@
+/*
+ * Neon Sign. The tube is the host's own text, so there is no class for it: the
+ * runtime writes `color` and a `text-shadow` stack straight onto the host. What
+ * lives here is the ambient spill — two injected `aria-hidden` layers that light
+ * the page around the sign — plus the demo page's own chrome.
+ *
+ * The spill is two layers because a light source and a lit surface composite
+ * differently, and both cases turn up on real pages. Haze in the air can only
+ * add light, which is `screen`, and `screen` is a no-op against white. Light
+ * bounced off a surface can only attenuate what that surface was already
+ * reflecting, which is `multiply`, and `multiply` is a no-op against black. A
+ * sign on a dark photograph is carried by the first, a sign on white paper by
+ * the second, and neither layer has to know which page it landed on.
+ *
+ * Gas colours arrive as channel triples in `--neon-sign-haze` and
+ * `--neon-sign-bounce` so each gradient stop can spend its own alpha. `inset`,
+ * `width`, `height`, `display`, `filter` and `opacity` are written from
+ * index.ts: the pool is sized from `spillRadius` and lit by the flicker.
+ *
+ * The falloff ends on a zero-alpha gas colour rather than on `transparent`,
+ * which is transparent *black*: interpolating to it in sRGB drags a grey bruise
+ * through the middle of the pool.
+ */
+
+/*
+ * Each spill layer is a pair: the outer element carries the blend mode and the
+ * flicker's opacity, the inner `.neon-sign-field` carries the gradients. Splitting
+ * them is a performance requirement, not tidiness - Gecko and WebKit re-rasterise
+ * a filtered or blurred element when a property on it changes, so keep every
+ * per-frame write on the outer element.
+ *
+ * The pool used to be one ellipse warped by an SVG turbulence + displacement +
+ * blur chain, which is the honest way to make a pool of light uneven and was far
+ * too expensive: a full-bleed filter per layer, ten of them on the demo page,
+ * re-run on every flicker step - measured at p95 56ms in WebKit and 28ms in
+ * Chromium, against 18ms and 9ms with the chain removed, and worse again on a 2x
+ * display where the filter has four times the pixels to chew.
+ *
+ * So the unevenness is built instead from three offset ellipses per layer at
+ * different sizes and alphas. Three overlapping gradients do not sum to an
+ * ellipse: the union has a lopsided edge, which is the read we wanted, and it
+ * costs a gradient fill rather than a filter pass.
+ */
+
+.neon-sign-field {
+  position: absolute;
+  inset: 0;
+}
+
+.neon-sign-haze {
+  mix-blend-mode: screen;
+}
+
+.neon-sign-haze > .neon-sign-field {
+  background:
+    radial-gradient(
+      ellipse 62% 58% at 43% 46%,
+      rgb(var(--neon-sign-haze) / 0.5) 0%,
+      rgb(var(--neon-sign-haze) / 0.2) 44%,
+      rgb(var(--neon-sign-haze) / 0) 78%
+    ),
+    radial-gradient(
+      ellipse 54% 66% at 61% 57%,
+      rgb(var(--neon-sign-haze) / 0.4) 0%,
+      rgb(var(--neon-sign-haze) / 0.15) 46%,
+      rgb(var(--neon-sign-haze) / 0) 80%
+    ),
+    radial-gradient(
+      ellipse 78% 48% at 50% 50%,
+      rgb(var(--neon-sign-haze) / 0.34) 0%,
+      rgb(var(--neon-sign-haze) / 0.12) 40%,
+      rgb(var(--neon-sign-haze) / 0) 74%
+    );
+}
+
+.neon-sign-bounce {
+  mix-blend-mode: multiply;
+}
+
+.neon-sign-bounce > .neon-sign-field {
+  /*
+   * A ring, not a disc. Right at the glass the eye reads the tube's own halo, so
+   * the bounce you actually notice is on the surface further out - and holding
+   * the peak off centre keeps a multiplying layer off the letters, which it
+   * would otherwise dull.
+   */
+  background:
+    radial-gradient(
+      ellipse 66% 60% at 46% 52%,
+      rgb(var(--neon-sign-bounce) / 0) 18%,
+      rgb(var(--neon-sign-bounce) / 0.34) 46%,
+      rgb(var(--neon-sign-bounce) / 0.16) 66%,
+      rgb(var(--neon-sign-bounce) / 0) 86%
+    ),
+    radial-gradient(
+      ellipse 56% 70% at 58% 46%,
+      rgb(var(--neon-sign-bounce) / 0) 22%,
+      rgb(var(--neon-sign-bounce) / 0.26) 50%,
+      rgb(var(--neon-sign-bounce) / 0.12) 68%,
+      rgb(var(--neon-sign-bounce) / 0) 88%
+    );
+}
+
+/* --- demo page only (src/effects/neon-sign/demo.html) --- */
+
+.neon-sign-demo-label {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/*
+ * `fit-content`, and it matters: the pool of light is centred on the host's box,
+ * so a full-width block host with a short line in it lights the whole column.
+ * A sign should be the width of its own tubing. The bottom margin is the pool's
+ * reach, or each specimen lights the next one.
+ */
+.neon-sign-demo-specimen {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 3.5rem;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+/* Deliberately unrelated type: the effect must not care which font it lights. */
+.neon-sign-demo-specimen--script {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.neon-sign-demo-specimen--mono {
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 3.4vw, 2rem);
+  font-weight: 400;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.22em;
+  text-transform: lowercase;
+}
+
+.neon-sign-demo-specimen--mixed {
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  font-weight: 400;
+}
+
+.neon-sign-demo-specimen--mixed em {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.25em;
+}
+
+.neon-sign-demo-specimen--mixed code {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 0.08em;
+}
+
+.neon-sign-demo-shot {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  /* Clipped, so the pool lands on the photograph instead of on the page. */
+}
+
+.neon-sign-demo-shot > img {
+  display: block;
+  width: 100%;
+  height: clamp(18rem, 46vw, 30rem);
+  object-fit: cover;
+}
+
+.neon-sign-demo-shot-sign {
+  position: absolute;
+  left: clamp(1rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 5vw, 3.5rem);
+  margin: 0;
+  max-width: 12em;
+  font-size: clamp(1.8rem, 6vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.neon-sign-demo-panel {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-2);
+}
+
+.neon-sign-demo-readout {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--ember);
+}
