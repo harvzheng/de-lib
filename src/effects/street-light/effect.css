@@ -1,0 +1,454 @@
+/*
+ * Street Light. A lamp that stands still while the host scrolls past under it.
+ *
+ * Every layer here is pinned to the viewport, not to the host. `lamp.ts` lays the
+ * whole rig out once in the coordinates of a *band* — `left: 0; width: 100%` of
+ * the host, `--sl-band` tall, tracking the viewport — and scroll never touches
+ * those gradients. It writes a `transform: translate3d()` on each layer, which
+ * slides the layer along the host so the light holds its place in the reader's
+ * frame. That is the difference between this and a light that sweeps: the
+ * gradients are painted once and composited, not re-authored per scroll step.
+ *
+ * Only the night is band-sized, because only the night has to cover everything
+ * the reader can see. The throw and the mist are sized to the boxes their own
+ * gradients actually reach, since a transparent pixel still costs a rasterised
+ * one — and at band size, measurably, it costs frames.
+ *
+ * Bottom to top: night (`multiply`, opening over the throw), the fixture (dark
+ * hardware), contrast (`overlay`, inside the throw), light (`screen`, inside the
+ * throw), then the mist (`screen`). Every blended one of them blends against the
+ * *host's* content, which is only true because neither the stack nor anything
+ * between it and them isolates.
+ *
+ * The initial values here are all no-ops. `index.ts` writes the real ones before
+ * the first paint, so a missed write can never leave a host blacked out.
+ */
+
+.street-light-stack {
+  /* No `isolation: isolate` here, deliberately: isolating makes the stack its own
+     compositing group, and its children would then blend against the stack's own
+     transparent backdrop instead of the host's content — which is the entire
+     point of every blend mode below. For the same reason nothing may add
+     `opacity`, `filter`, `mask`, `clip-path`, `contain` or `transform` to this
+     element, nor introduce a wrapper carrying any of them: each creates an
+     isolated group. Measured in Blink, Gecko and WebKit — a `transform` on the
+     stack or on an intervening wrapper silently flattens every layer to paint,
+     while the same `transform` on a blended child is fine, because that child is
+     already a group in its own right. */
+  overflow: hidden;
+
+  --sl-light: #ffc27a;
+  --sl-night: #4a5c80;
+  --sl-depth: 0;
+  --sl-glow: 0;
+  --sl-cone: 0;
+  --sl-buzz: 1;
+  --sl-band: 0;
+  --sl-lens-x: 0;
+  --sl-lens-y: 0;
+  --sl-cone-half: 10deg;
+  --sl-cone-length: 0;
+  --sl-cone-x: 0;
+  --sl-cone-y: 0;
+  --sl-cone-w: 0;
+  --sl-cone-h: 0;
+  --sl-throw-x: 0;
+  --sl-throw-y: 0;
+  --sl-throw-w: 0;
+  --sl-throw-h: 0;
+  --sl-fixture-x: 0;
+  --sl-fixture-y: 0;
+  --sl-fixture-w: 0;
+  --sl-fixture-h: 0;
+  --sl-hot-x: 0;
+  --sl-hot-y: 0;
+  --sl-hot-a: 0;
+  --sl-hot-b: 0;
+  --sl-pool-x: 0;
+  --sl-pool-y: 0;
+  --sl-pool-a: 0;
+  --sl-pool-b: 0;
+  --sl-tail-x: 0;
+  --sl-tail-y: 0;
+  --sl-tail-a: 0;
+  --sl-tail-b: 0;
+  --sl-arm: 0;
+  --sl-arm-thickness: 0;
+  --sl-mast-thickness: 0;
+  --sl-head-w: 0;
+  --sl-head-h: 0;
+  --sl-side: -1;
+}
+
+.street-light-band,
+.street-light-throw,
+.street-light-cone {
+  position: absolute;
+  pointer-events: none;
+}
+
+.street-light-band {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(var(--sl-band) * 1px);
+}
+
+/*
+ * The throw's own box. Its gradient centres are the band-space ones with the
+ * box's origin taken back off, which keeps `lamp.ts` speaking one coordinate
+ * system while the layers are only as big as they need to be.
+ */
+.street-light-throw {
+  left: calc(var(--sl-throw-x) * 1px);
+  top: calc(var(--sl-throw-y) * 1px);
+  width: calc(var(--sl-throw-w) * 1px);
+  height: calc(var(--sl-throw-h) * 1px);
+
+  --sl-lens-lx: calc((var(--sl-lens-x) - var(--sl-throw-x)) * 1px);
+  --sl-lens-ly: calc((var(--sl-lens-y) - var(--sl-throw-y)) * 1px);
+  --sl-hot-lx: calc((var(--sl-hot-x) - var(--sl-throw-x)) * 1px);
+  --sl-hot-ly: calc((var(--sl-hot-y) - var(--sl-throw-y)) * 1px);
+  --sl-pool-lx: calc((var(--sl-pool-x) - var(--sl-throw-x)) * 1px);
+  --sl-pool-ly: calc((var(--sl-pool-y) - var(--sl-throw-y)) * 1px);
+  --sl-tail-lx: calc((var(--sl-tail-x) - var(--sl-throw-x)) * 1px);
+  --sl-tail-ly: calc((var(--sl-tail-y) - var(--sl-throw-y)) * 1px);
+}
+
+/*
+ * Night. A `multiply` of a blue-grey darkens the host's content and cools it at
+ * the same time, which is the difference between night and a vignette: black
+ * would only take light away, and take the colour with it.
+ *
+ * The darkness opens over the throw, cut from the *tail* ellipse — the run-out
+ * envelope — so it reopens for as far as the light actually reaches. The ramp is
+ * long but it does close: an edge that never quite reaches full darkness reads as
+ * a wash over the whole frame rather than as a pool with a street around it.
+ *
+ * The hole is a hole in the *paint*, not a `mask-image`. A multiply layer with
+ * zero alpha is already the identity, so a gradient that fades the multiplicand
+ * out at the centre does exactly what masking the layer did — and measurably
+ * cheaper: a mask on this layer stopped Gecko caching it, and cost ~8ms of every
+ * scrolled frame at 1280x800.
+ */
+.street-light-night {
+  /*
+   * `depth` has to deepen the night, not fade a fixed tint into it. Painting the
+   * stock colour at `opacity: depth` caps how dark the multiply can ever get at the
+   * stock colour itself: at the default city blue, white paper bottoms out around
+   * rgb(74 92 128) - a pale blue wash, which is what a vignette looks like and what
+   * night does not. So depth interpolates the multiplicand from white (a true
+   * no-op) toward a deepened night, and the layer paints at full opacity. The
+   * target keeps 55% of the stock rather than heading for black, which is what
+   * keeps night blue instead of grey.
+   */
+  --sl-night-deep: color-mix(in srgb, var(--sl-night), #000 45%);
+  --sl-mul: color-mix(in srgb, #fff, var(--sl-night-deep) calc(var(--sl-depth) * 100%));
+
+  background-color: transparent;
+  background-image: radial-gradient(
+    calc(var(--sl-tail-a) * 1px) calc(var(--sl-tail-b) * 1px) at calc(var(--sl-tail-x) * 1px)
+      calc(var(--sl-tail-y) * 1px),
+    transparent 0%,
+    color-mix(in srgb, var(--sl-mul) 14%, transparent) 26%,
+    color-mix(in srgb, var(--sl-mul) 52%, transparent) 54%,
+    color-mix(in srgb, var(--sl-mul) 86%, transparent) 76%,
+    var(--sl-mul) 94%
+  );
+  mix-blend-mode: multiply;
+}
+
+/*
+ * Contrast. `overlay` multiplies where the host is dark and screens where it is
+ * light, so this pushes the lit content apart rather than washing a colour over
+ * it: ink under the lamp stays ink, paper under the lamp goes bright. That is
+ * what stops the throw reading as a sticker.
+ */
+.street-light-lit {
+  background-image:
+    radial-gradient(
+      calc(var(--sl-hot-a) * 1px) calc(var(--sl-hot-b) * 1px) at var(--sl-hot-lx) var(--sl-hot-ly),
+      color-mix(in srgb, var(--sl-light) 88%, transparent) 0%,
+      color-mix(in srgb, var(--sl-light) 46%, transparent) 52%,
+      transparent 100%
+    ),
+    radial-gradient(
+      calc(var(--sl-pool-a) * 1px) calc(var(--sl-pool-b) * 1px) at var(--sl-pool-lx)
+        var(--sl-pool-ly),
+      color-mix(in srgb, var(--sl-light) 34%, transparent) 0%,
+      transparent 86%
+    );
+  mix-blend-mode: overlay;
+  opacity: calc(var(--sl-glow) * 0.8 * var(--sl-buzz));
+}
+
+/*
+ * Light. `screen` can only add, so this is the layer that genuinely brightens
+ * whatever passes under the lamp. Four ellipses: the lens itself, the hotspot
+ * below it, the pool proper, and a wide dim wash over the tail. They are
+ * background layers on one element rather than four elements, because four
+ * separately blended layers would each screen against the previous one's result
+ * and stack up far brighter than a lamp does.
+ *
+ * The lens ellipse is what makes the fixture read as switched on: the hardware
+ * below it is cold metal, and the only bright thing about it is light this layer
+ * adds.
+ */
+.street-light-glow {
+  background-image:
+    radial-gradient(
+      calc(var(--sl-head-w) * 0.4px) calc(var(--sl-head-h) * 0.7px) at var(--sl-lens-lx)
+        var(--sl-lens-ly),
+      color-mix(in srgb, var(--sl-light) 98%, transparent) 0%,
+      color-mix(in srgb, var(--sl-light) 68%, transparent) 50%,
+      transparent 100%
+    ),
+    radial-gradient(
+      calc(var(--sl-hot-a) * 1px) calc(var(--sl-hot-b) * 1px) at var(--sl-hot-lx) var(--sl-hot-ly),
+      color-mix(in srgb, var(--sl-light) 86%, transparent) 0%,
+      color-mix(in srgb, var(--sl-light) 52%, transparent) 42%,
+      transparent 100%
+    ),
+    radial-gradient(
+      calc(var(--sl-pool-a) * 1px) calc(var(--sl-pool-b) * 1px) at var(--sl-pool-lx)
+        var(--sl-pool-ly),
+      color-mix(in srgb, var(--sl-light) 54%, transparent) 0%,
+      color-mix(in srgb, var(--sl-light) 18%, transparent) 52%,
+      transparent 92%
+    ),
+    radial-gradient(
+      calc(var(--sl-tail-a) * 1px) calc(var(--sl-tail-b) * 1px) at var(--sl-tail-lx)
+        var(--sl-tail-ly),
+      color-mix(in srgb, var(--sl-light) 13%, transparent) 0%,
+      transparent 70%
+    );
+  mix-blend-mode: screen;
+  opacity: calc(var(--sl-glow) * var(--sl-buzz));
+}
+
+/*
+ * The mist cone: light in the air between the lens and the ground.
+ *
+ * Shape and brightness are kept in different properties on purpose. A
+ * `conic-gradient` centred on the lens is a cone by construction — it widens with
+ * distance, and its angular stops feather the edges into the air rather than
+ * cutting them. A `radial-gradient` mask, centred on the same point, is the
+ * distance falloff. Nothing here is clipped and nothing is blurred: `clip-path`
+ * is applied *after* `filter`, so the old build's blurred-then-clipped wedge
+ * threw its own soft edge away at the clip boundary and read as plastic
+ * sheeting. Soft gradients have no boundary to throw away.
+ *
+ * The box puts the lens exactly at its top centre, so both gradients are placed
+ * at `50% 0%` and the element is only as big as the mist it carries — a mask this
+ * small costs nothing, where the same mask at band size cost frames.
+ */
+.street-light-cone {
+  left: calc(var(--sl-cone-x) * 1px);
+  top: calc(var(--sl-cone-y) * 1px);
+  width: calc(var(--sl-cone-w) * 1px);
+  height: calc(var(--sl-cone-h) * 1px);
+
+  --sl-cone-fade: radial-gradient(
+    calc(var(--sl-cone-length) * 1px) calc(var(--sl-cone-length) * 1px) at 50% 0%,
+    #000 0%,
+    rgb(0 0 0 / 62%) 34%,
+    rgb(0 0 0 / 22%) 68%,
+    transparent 100%
+  );
+
+  background-image: conic-gradient(
+    from calc(180deg - var(--sl-cone-half)) at 50% 0%,
+    transparent 0deg,
+    color-mix(in srgb, var(--sl-light) 42%, transparent) calc(var(--sl-cone-half) * 0.55),
+    color-mix(in srgb, var(--sl-light) 64%, transparent) var(--sl-cone-half),
+    color-mix(in srgb, var(--sl-light) 42%, transparent) calc(var(--sl-cone-half) * 1.45),
+    transparent calc(var(--sl-cone-half) * 2)
+  );
+  mix-blend-mode: screen;
+  opacity: calc(var(--sl-cone) * var(--sl-buzz));
+  -webkit-mask-image: var(--sl-cone-fade);
+  mask-image: var(--sl-cone-fade);
+}
+
+/*
+ * The fixture: a mast off the top of the frame, an arm reaching in off it, and
+ * the head on the end. Cold hardware only — the lens is a `screen` ellipse on
+ * the light layer above, so what is drawn here is unlit metal, and turning the
+ * lamp down leaves a silhouette rather than a glowing sticker.
+ *
+ * The metal is shaded rather than flat: a cold edge falling to near-black across
+ * its own thickness. Without it the fixture is a black shape on ground the night
+ * has already taken to black, which is a lamp the reader cannot see; with it, the
+ * hardware reads as picking up whatever light the sky still has.
+ *
+ * The three parts are separate elements rather than pseudo-elements because the
+ * head is shaped with `clip-path`, and a clip on a parent would take the arm and
+ * the mast with it.
+ */
+.street-light-fixture {
+  position: absolute;
+  left: calc(var(--sl-fixture-x) * 1px);
+  top: calc(var(--sl-fixture-y) * 1px);
+  width: calc(var(--sl-fixture-w) * 1px);
+  height: calc(var(--sl-fixture-h) * 1px);
+  pointer-events: none;
+
+  --sl-metal: #14171d;
+  --sl-metal-lit: #3b4450;
+}
+
+.street-light-mast,
+.street-light-arm,
+.street-light-head {
+  position: absolute;
+  background: linear-gradient(180deg, var(--sl-metal-lit) 0%, var(--sl-metal) 62%);
+}
+
+/*
+ * The mast reaches from the band's top slack to the arm. That begins half a
+ * viewport above the visible frame, so the pole always leaves the picture
+ * rather than stopping in mid-air; making the container any taller would only
+ * rasterise transparent pixels.
+ */
+.street-light-mast {
+  left: calc(
+    (var(--sl-lens-x) + var(--sl-side) * var(--sl-arm) - var(--sl-mast-thickness) * 0.5 -
+          var(--sl-fixture-x)) *
+      1px
+  );
+  top: 0;
+  width: calc(var(--sl-mast-thickness) * 1px);
+  height: calc((var(--sl-lens-y) - var(--sl-head-h) + var(--sl-arm-thickness)) * 1px);
+  background: linear-gradient(90deg, var(--sl-metal-lit) 0%, var(--sl-metal) 58%);
+}
+
+.street-light-arm {
+  left: calc(
+    (var(--sl-lens-x) + (var(--sl-side) - 1) * 0.5 * var(--sl-arm) - var(--sl-fixture-x)) *
+      1px
+  );
+  top: calc((var(--sl-lens-y) - var(--sl-head-h) - var(--sl-fixture-y)) * 1px);
+  width: calc(var(--sl-arm) * 1px);
+  height: calc(var(--sl-arm-thickness) * 1px);
+}
+
+/* A shallow housing, wider at the top than at the lens it sits over. */
+.street-light-head {
+  left: calc((var(--sl-lens-x) - var(--sl-head-w) * 0.5 - var(--sl-fixture-x)) * 1px);
+  top: calc((var(--sl-lens-y) - var(--sl-head-h) - var(--sl-fixture-y)) * 1px);
+  width: calc(var(--sl-head-w) * 1px);
+  height: calc(var(--sl-head-h) * 1px);
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 14% 100%);
+}
+
+/* --- demo page only (src/effects/street-light/demo.html) --- */
+
+.street-light-demo-gap {
+  height: 46vh;
+}
+
+/*
+ * The street. A night scene the reader walks down: dark ground, mixed content
+ * spread over enough scroll that every piece of it is seen dark, then lit, then
+ * dark again.
+ *
+ * The ground is dark but not black on purpose. Multiplying night onto near-black
+ * content has nothing to take away and screening light onto white has nothing to
+ * add, so the tones here sit where both halves of the effect have somewhere to
+ * go: asphalt around 20% grey, text and photographs carrying the range.
+ *
+ * The ground stays a flat colour deliberately. A gradient stretched over this
+ * four-screen host, or even a small repeated grain tile, becomes part of the
+ * backdrop every blend layer has to read; Gecko then rasterises that host-height
+ * backdrop at every scroll frame. The photographs, type and coin supply the
+ * surface detail the light catches without making empty asphalt expensive.
+ */
+.street-light-demo-street {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  background: #2c3138;
+  color: #e7ecf3;
+}
+
+.street-light-demo-stop {
+  min-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh clamp(1.5rem, 6vw, 5rem);
+  box-sizing: border-box;
+}
+
+.street-light-demo-stop > h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.9rem, 5vw, 3.1rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  max-width: 22ch;
+}
+
+.street-light-demo-stop > p {
+  margin: 0 0 1.1rem;
+  max-width: 44ch;
+  font-size: 1.04rem;
+  line-height: 1.62;
+}
+
+.street-light-demo-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 0.6rem;
+  opacity: 0.66;
+}
+
+.street-light-demo-figure {
+  margin: 0;
+  max-width: 44rem;
+}
+
+.street-light-demo-figure > img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.896;
+  object-fit: cover;
+}
+
+.street-light-demo-figure > figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  margin-top: 0.6rem;
+  opacity: 0.6;
+}
+
+/*
+ * The coin. It is host content, not part of the effect: it scrolls under the
+ * lamp with everything else, and the lamp lights it the same way it lights the
+ * photographs. The demo spins it from the same progress value the effect reads,
+ * which is why it flips as it crosses the pool.
+ */
+.street-light-demo-toss {
+  perspective: 340px;
+  height: 4.5rem;
+  margin: 0 0 1.4rem;
+}
+
+.street-light-demo-coin {
+  display: block;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(60% 60% at 34% 30%, #fff 0%, #d9c07d 42%, #8c7331 100%);
+  box-shadow: inset 0 0 0 2px rgb(255 255 255 / 22%);
+  will-change: transform;
+}
+
+.street-light-demo-readout {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--ember);
+}

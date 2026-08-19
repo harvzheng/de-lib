@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Street Light: a lamp that stands still while the page walks under it, and whatever is under it right now is genuinely lit — CSS blend modes, no WebGL."
+    />
+    <title>Street Light — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Street Light</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS &middot; blend modes &middot; overlay</span>
+    </nav>
+
+    <main class="demo-shell">
+      <div class="demo-hero">
+        <p class="demo-kicker">Overlay — CSS blend modes, no WebGL</p>
+        <h1>Street Light</h1>
+        <p>
+          One lamp on a wire, standing still. Scroll, and the page walks underneath it: the
+          heading, the paragraph and the photograph below each go dark, then lit, then dark
+          again as they pass through the pool on the ground. The lamp never moves — you do.
+        </p>
+        <span class="demo-scroll-hint">Scroll to walk the page under it</span>
+      </div>
+
+      <div class="street-light-demo-gap" aria-hidden="true"></div>
+
+      <section class="demo-section">
+        <article class="street-light-demo-street" id="scene">
+          <div class="street-light-demo-stop">
+            <p class="street-light-demo-kicker">Under the lamp &middot; 11:40pm</p>
+            <h2>He flips the coin and waits for the bus</h2>
+            <div class="street-light-demo-toss" aria-hidden="true">
+              <span class="street-light-demo-coin" id="coin"></span>
+            </div>
+            <p>
+              Nothing on this page is a copy of itself sitting under a coloured disc. The
+              darkness is a blue-grey <code class="demo-inline-code">multiply</code> with a hole
+              in it, and the light is a warm <code class="demo-inline-code">screen</code> and
+              <code class="demo-inline-code">overlay</code> through that same hole, so the pixels
+              being brightened are the ones you are reading.
+            </p>
+          </div>
+
+          <div class="street-light-demo-stop">
+            <figure class="street-light-demo-figure">
+              <img src="/media/shot-c.jpg" alt="A quiet street corner photographed at dusk." />
+              <figcaption>
+                Watch the photograph as it climbs through the pool: its shadows stay dark while
+                its highlights lift and warm. That is contrast, not paint.
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="street-light-demo-stop">
+            <h2>Then out of it again, and the street closes over</h2>
+            <p>
+              Text stays text. This paragraph is selectable, searchable and read out in order,
+              because the effect never touches the host's own markup — it appends
+              <code class="demo-inline-code">aria-hidden</code> layers that take no pointer
+              events and blend against whatever the host already painted.
+            </p>
+            <p>
+              The lamp is drawn too: a mast off the top of the frame, an arm reaching in, and a
+              head with a hot lens. The hardware is dark metal; the only bright thing about it is
+              light the <code class="demo-inline-code">screen</code> layer adds, so turning the
+              lamp down leaves a silhouette rather than a glowing sticker.
+            </p>
+          </div>
+
+          <div class="street-light-demo-stop">
+            <figure class="street-light-demo-figure">
+              <img src="/media/shot-b.jpg" alt="A figure crossing an empty road at night." />
+              <figcaption>
+                Same lamp, second pass. Whatever sits on the lamp's line is lit; everything above
+                and below it is in the blue.
+              </figcaption>
+            </figure>
+          </div>
+        </article>
+
+        <p class="demo-note">
+          Progress: <span class="street-light-demo-readout" id="progress">0.000</span> —
+          scroll-driven by default. Turn off <em>Scroll-driven</em> in the controls and the
+          <em>Progress</em> slider walks the page under the lamp by hand, which lands the light
+          in exactly the same place a real scroll would. It is the quickest way to compare one
+          element lit against the same element dark.
+        </p>
+      </section>
+
+      <div class="street-light-demo-gap" aria-hidden="true"></div>
+
+      <section class="demo-section">
+        <h2>Drop it over content you already have</h2>
+        <p class="demo-note">
+          The host keeps its own background, text and images; the lamp lights them. It wants
+          content with somewhere to fall from and somewhere to rise to — a dark-but-not-black
+          ground, a photograph, a video — since multiplying night onto near-black has nothing to
+          take away and screening light onto white has nothing to add.
+        </p>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/street-light/effect.css';
+import { createStreetLight } from './effects/street-light';
+
+const lamp = createStreetLight(host, {
+  anchor: 0.26,     // the lamp's line, as a viewport fraction
+  column: 0.4,      // where it stands across the host
+  light: '#ffc27a', // sodium; '#f2f6ff' for LED
+  night: '#4a5c80', // night is blue, not black
+});
+
+// Drive it yourself instead of by scroll.
+lamp.setOptions({ scroll: false, progress: 0.35 });
+lamp.setProgress(0.62);
+
+lamp.destroy();</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/street-light/demo.ts"></script>
+  </body>
+</html>
