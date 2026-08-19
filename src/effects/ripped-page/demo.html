@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Ripped Page: the outgoing shot tears in half and pulls apart to reveal the next, with a fibrous paper edge and a travel-edit speed ramp — CSS clip-path and SVG, no WebGL."
+    />
+    <title>Ripped Page — Web Effects Pack</title>
+  </head>
+  <body class="demo">
+    <nav class="demo-nav" aria-label="Demo navigation">
+      <a href="/">Web Effects Pack</a>
+      <span aria-hidden="true">/</span>
+      <strong>Ripped Page</strong>
+      <span class="demo-nav-spacer"></span>
+      <span>CSS &middot; SVG &middot; transition</span>
+    </nav>
+
+    <main class="demo-shell">
+      <div class="demo-hero">
+        <p class="demo-kicker">Transition — CSS clip-path &amp; SVG, no WebGL</p>
+        <h1>Ripped Page</h1>
+        <p>
+          The shot on screen is a printed page. It tears across, the fibres let go in bundles, and
+          the two halves hinge off one end of the rip and pull away to reveal the next shot, which
+          settles out of a punch-in behind them. Cut the way a travel edit cuts: the tear holds,
+          snaps, then decelerates.
+        </p>
+        <span class="demo-scroll-hint">Scroll to tear</span>
+      </div>
+    </main>
+
+    <section id="rip" class="ripped-page-demo-scroller"></section>
+
+    <main class="demo-shell">
+      <section class="demo-section">
+        <h2>One polyline, used three ways</h2>
+        <p class="demo-note">
+          The rip is generated once as a deterministic polyline: 1D midpoint displacement, because a
+          tear in paper is self-similar — every scale of the edge looks like the scale above it. That
+          one line becomes a <code class="demo-inline-code">clip-path</code> polygon on each half, the
+          <code class="demo-inline-code">d</code> of the stroked path that paints the fibre edge, and
+          the shadow the torn edge casts into the gap. Nothing is regenerated while you scroll: each
+          frame writes only transforms.
+        </p>
+      </section>
+
+      <section class="demo-section">
+        <h2>The two shots</h2>
+        <div class="ripped-page-demo-strip demo-panel">
+          <figure>
+            <img src="/media/shot-a.jpg" alt="" />
+            <figcaption>from — the page that tears</figcaption>
+          </figure>
+          <figure>
+            <img src="/media/shot-c.jpg" alt="" />
+            <figcaption>to — revealed underneath</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <h2>Usage</h2>
+        <div class="demo-panel">
+          <pre class="demo-code"><code>import './effects/ripped-page/effect.css';
+import { createRippedPage } from './effects/ripped-page';
+
+// The host is the scroll length; the effect pins the picture inside it.
+const rip = createRippedPage(document.querySelector('#rip'), {
+  from: '/media/shot-a.jpg',
+  to: '/media/shot-c.jpg',
+  axis: 'horizontal',
+  angle: -7,
+  roughness: 0.55,
+  fiber: 0.5,
+  separation: 0.85,
+  hold: 0.12,
+});
+
+// Drive it yourself instead of by scroll.
+rip.setOptions({ scroll: false });
+rip.setProgress(0.5);
+
+rip.destroy();</code></pre>
+        </div>
+        <p class="demo-note">
+          Every option is documented in
+          <code class="demo-inline-code">src/effects/ripped-page/README.md</code>.
+        </p>
+      </section>
+    </main>
+
+    <details class="demo-controls">
+      <summary>Controls</summary>
+    </details>
+
+    <script type="module" src="/src/effects/ripped-page/demo.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+/*
+ * Ripped Page. One stack over the host, one pinned frame inside it, and inside
+ * that: the revealed shot, the shadow the torn edge casts into the gap, and the
+ * two halves of the outgoing page. Each half carries its own copy of that page
+ * plus an SVG path stroked along the rip — the half's `clip-path` cuts the outer
+ * half of that stroke away, which is what leaves a hard fibrous edge on the
+ * paper and nothing hanging outside it.
+ *
+ * `clip-path` and `transform-origin` are written when the geometry is built
+ * (mount, resize, or a tear option changing). Per frame `index.ts` writes only
+ * `transform` on the halves and the shadow, `opacity` on the shadow, and the
+ * settle `scale` on the revealed shot.
+ */
+
+.ripped-page-frame {
+  --ripped-page-edge: 3px;
+  --ripped-page-edge-color: #fdf6e8;
+  /* Pins the picture while the host scrolls past, which is what makes the
+     default scroll mapping a scrub rather than a slide. A host no taller than
+     the viewport takes its own height and the sticky never engages. */
+  position: sticky;
+  top: var(--ripped-page-pin-top, 0px);
+  height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+  /* The halves leave the frame and the grain blends over it; without its own
+     stacking context both would reach the page behind the effect. */
+  isolation: isolate;
+  background: #05060a;
+}
+
+.ripped-page-reveal,
+.ripped-page-half {
+  position: absolute;
+  inset: 0;
+}
+
+.ripped-page-reveal > img,
+.ripped-page-reveal > video,
+.ripped-page-half > img,
+.ripped-page-half > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ripped-page-reveal {
+  /* The settle punch is a transform on a promoted layer, so the revealed shot
+     rasterises once however far the scrub moves. */
+  will-change: transform;
+}
+
+.ripped-page-half {
+  will-change: transform;
+  /* Backface and edge antialiasing: a rotated clipped layer otherwise shows a
+     one-pixel seam of the layer beneath along the rip. */
+  backface-visibility: hidden;
+}
+
+.ripped-page-fibres,
+.ripped-page-shadow {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ripped-page-fibre-path {
+  fill: none;
+  stroke: var(--ripped-page-edge-color);
+  /* Doubled: the clip keeps the inner half, so the visible edge is `edge` wide. */
+  stroke-width: calc(var(--ripped-page-edge) * 2);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ripped-page-shadow {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.ripped-page-shadow path {
+  fill: none;
+  stroke: #000;
+  stroke-width: calc(var(--ripped-page-edge) * 4);
+  stroke-linejoin: round;
+}
+
+.ripped-page-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-size: 170px 170px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='170'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.86' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='170' height='170' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- demo page only (src/effects/ripped-page/demo.html) --- */
+
+.ripped-page-demo-scroller {
+  position: relative;
+  height: 300vh;
+  background: #05060a;
+}
+
+.ripped-page-demo-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+}
+
+.ripped-page-demo-strip figure {
+  margin: 0;
+  background: var(--paper-2);
+}
+
+.ripped-page-demo-strip img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.896;
+  object-fit: cover;
+}
+
+.ripped-page-demo-strip figcaption {
+  padding: 0.6rem 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
